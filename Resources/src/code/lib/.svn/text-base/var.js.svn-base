@@ -1,0 +1,144 @@
+require('src/include/require_once').monkeypatch(this)
+var sequence = require('src/code/lib/sequence')
+var exports  = exports || {}
+
+	NUMERIC = 'numeric'
+
+	function defaultValue( a, b ) { return a || b }
+	 exports.defaultValue = defaultValue
+
+	function compare( a, b, useExact )
+	{
+		var useExact = useExact || true
+	return  useExact ? ( a === b ) : ( a == b )
+	}exports.compare = compare
+
+	function isType( input, type, useExact )   { return exports.compare( type , typeof(input), useExact ) }
+	 exports.isType = isType
+
+	function isValue( input, value, useExact ) { return exports.compare( value,        input , useExact ) }
+	exports.isValue = isValue
+
+	function isFunction	 ( input, useExact )  { return exports.isType( input, 'function', useExact ) }
+	 exports.isFunction = isFunction
+
+	function isObject	 ( input, useExact ) { return exports.isType( input, 'object', useExact ) }
+	 exports.isObject = isObject
+
+	function isBoolean	 ( input, useExact ) { return exports.isBoolean( input, 'boolean', useExact ) }
+	 exports.isBoolean = isBoolean 
+
+	function isNumeric	 ( input, useExact ) { return exports.isType( input, NUMERIC, useExact ) }
+	 exports.isNumeric = isNumeric
+
+	function isInt		 ( input, useExact ) { return (  exports.isType( input, NUMERIC, useExact )  &&  exports.isValue( input % 1, 0, useExact )  ) }
+	 exports.isInt = isInt
+
+	function isFloat	 ( input, useExact ) { return (  exports.isType( input, NUMERIC, useExact )  &&  ( !exports.isInt( input, useExact ) )  ) }
+	 exports.isFloat = isFloat
+
+	function isArray	 ( input, useExact )	{ return exports.isValue( Object.prototype.toString.call(input), '[object Array]', useExact ) }
+	 exports.isArray = isArray
+
+	function isDictionary( input, useExact ) { return ( exports.isObject( input, useExact )  &&  ( sequence.keys(input).length > 0 )  ) }
+	 exports.isDictionary = isDictionary
+
+	function isSequence	 ( input, useExact ) {  return ( exports.isArray( input, useExact ) || exports.isDictionary( input, useExact ) )  }
+	 exports.isSequence = isSequence
+
+	function isZero		 ( input, useExact ) { return exports.isValue( input, 0, useExact ) }
+	 exports.isZero = isZero
+
+	function isUndefined ( input, useExact ) { return exports.isValue( input, undefined, useExact ) }
+	 exports.isUndefined = isUndefined
+
+	function isNull		 ( input, useExact ) { return exports.isValue( input, null, useExact ) }
+	 exports.isNull = isNull
+
+	function isNothing	 ( input, useExact ) { return ( exports.isUndefined( input, useExact ) || exports.isNull( input, useExact ) ) }
+	 exports.isNothing = isNothing
+
+	function isEmpty 	 ( input, useExact ) { return (  exports.isNothing( input, useExact )  ||  exports.isValue( input, '', useExact )  )  }
+	 exports.isEmpty = isEmpty
+
+	function isSomething ( input, useExact ) {  return (  ( String(input).length > 0 )  &&  !exports.isZero( input, useExact )  )  }
+	 exports.isSomething = isSomething
+
+	function exists(input) { return input || null } // could be null or undefined, we want to force null JIC
+	 exports.exists = exists
+
+	function type( input, useExact )
+	{
+		var functions = [  exports.isSequence , exports.isDictionary , exports.isArray , exports.isFloat , exports.isInt  ]
+		var results   = [           'sequence',          'dictionary',          'array',          'float',          'int' ]
+		for ( var iFunction = 0, IFunction = functions.length;  iFunction < IFunction;  iFunction++ )
+		{
+			fn = functions[iFunction]
+			if ( fn(input), useExact )
+			{
+	return results[iFunction]
+			}
+		}
+	return typeof(input)
+	}exports.type = type
+
+
+	function hasattr( obj, attr )
+	{// inspired in python's hasattr'
+		var dictionary = {}
+		for ( property in obj )
+			dictionary[property] = true
+	return  dictionary.hasOwnProperty(attr)
+	}exports.hasattr = hasattr
+
+	function bool3states(value)
+	{// leverages all kinds of positive or negative input
+		if ( isNothing(value) )
+		{
+	return null
+		}
+	
+		switch (value)
+		{
+			case 'N':
+			case 'n':
+			case 'No':
+			case 'no':
+			case  0:
+			case false:
+	return false
+		break
+		}
+	return true
+	}exports.bool3states = bool3states
+
+	function bool2states( value, state ) { return exports.bool3states(value) || state  }
+	 exports.bool2states = bool2states
+
+	function stringToDate(dateString)
+	{// from https://github.com/appcelerator-developer-relations/Forging-Titanium/blob/master/ep-010/Forms/Resources/semiModalPicker.js
+		var dateString = dateString || ''
+		var matches    = /(\d+)\/(\d+)\/(\d+)/.exec(dateString)
+	if (  matches  &&  ( matches.length >= 4 )  )	return new Date( matches[3], matches[1] - 1, matches[2] )
+/* else */											return new Date()
+	}exports.stringToDate = stringToDate
+
+
+	function dateToString(oDate)
+	{// from https://github.com/appcelerator-developer-relations/Forging-Titanium/blob/master/ep-010/Forms/Resources/semiModalPicker.js
+	return (oDate.getMonth()+1) + '/' + oDate.getDate() + '/' + oDate.getFullYear()
+	}exports.dateToString = dateToString
+
+
+	function callIfFunction(fn /*, args*/)
+	{
+		var args = sequence.listToArray(arguments)
+			args.shift() // takeout the actual fn
+	if ( exports.isFunction(fn) ) 	return fn.apply( this, args )
+/* else */							return null
+	}exports.callIfFunction = callIfFunction
+
+	function forwardArguments( fn, args, extend )  {  fn.apply( extend || this, sequence.listToArray(args) )  }
+	exports.forwardArguments = forwardArguments
+
+

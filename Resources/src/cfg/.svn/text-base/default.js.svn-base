@@ -1,0 +1,27 @@
+
+	var cfg = {
+		logIn: {
+			titleWindow: 'PromoIt Reward',
+			title      : 'Welcome to PromoIt',
+			detail     : 'Hakuna Matata what a wonderful frase',
+			button     : 'PromoIt(R) LogIn',
+			terms      : {
+				title: 'Terms and Conditions',
+				URL  : 'http://www.google.com',
+				HTML : '<a href="http://www.google.com" target="_blank">Terms and Conditions</a>'
+			}
+		},
+
+		logIn_API: {
+			titleWindow : 'LogIn',
+		},
+
+		profile: {
+			ranks        : 'Current Rankings',
+			badges       : '%d Badges Unlocked',
+			friends      : 'Following %d friends',
+			promotions   : 'Promotion History',
+			notifications: 'Notifications Settings',
+			settings     : 'Profile Settings'
+		} 
+	}

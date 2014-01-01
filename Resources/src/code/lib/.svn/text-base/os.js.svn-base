@@ -1,0 +1,30 @@
+var exports = exports || {}
+	var OSname     = Ti.Platform.getOsname();
+	var OStype     = Ti.Platform.getOstype();
+    var isAndroid  = ( 'android' === OSname )
+	var isIPhone   = ( 'iphone'  === OSname )
+	var isIPad     = ( 'ipad'    === OSname )
+
+	function statusHide()
+	{
+		if (exports.isIOS)
+		{
+Ti.UI.iPhone.hideStatusBar()
+		}
+	}exports.statusHide = statusHide
+
+	function statusShow()
+	{
+		if (exports.isIOS)
+		{
+Ti.UI.iPhone.showStatusBar()
+		}
+	}exports.statusShow = statusShow
+
+exports.name       = OSname
+exports.type       = OStype
+exports.isAndroid  = isAndroid
+exports.isIPhone   = isIPhone
+exports.isIPad     = isIPad
+exports.isIOS      = ( isIPhone || isIPad )
+Ti.API.info(OSname + ', ' + OStype)

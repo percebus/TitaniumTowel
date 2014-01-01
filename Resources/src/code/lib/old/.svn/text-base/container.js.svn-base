@@ -1,0 +1,189 @@
+require('src/include/require_once').monkeypatch(this)
+var libMem      = require('src/code/lib/mem')
+var libSequence = require('src/code/lib/sequence')
+var libVar      = require('src/code/lib/var')
+var exports  = exports || {}
+
+	function Depth()
+	{// Class aware of how many windows ar in place
+		var DEPTH  = 'depth'
+		this.GET   = function(){ return Ti.App.Properties.getInt(DEPTH) || 0 }
+		this.SET   = function(input)
+						{
+							Ti.App.Properties.setInt( DEPTH, input )
+						return this.GET()
+						}
+		this.PLUS  = function()  { return this.SET( this.GET() +1 ) }
+		this.MINUS = function()  { return this.SET( this.GET() -1 ) } 
+	}oDepth = new Depth()
+	exports.oDepth = oDepth
+
+	function defaultAttributesWindowLight(attributes) { return libSequence.map(  function ( iList, list ){ libSequence.deleteKey( attributes, list[iList] ) }, [ 'fullscreen', 'modal', 'navBarHidden', 'windowSoftInputMode' ]  ) }
+	 exports.defaultAttributesWindowLight = defaultAttributesWindowLight
+
+	function defaultAttributesOpenAndClose(attributes) { return libSequence.defaultDictionary( attributes, { animated: true } ) }
+	exports.defaultAttributesOpenAndClose = defaultAttributesOpenAndClose
+
+	function defaultWindow(win) { return win || Ti.UI.currentWindow }
+	 exports.defaultWindow = defaultWindow
+
+	function defaultTab(tab) { return tab || Ti.UI.currentTab }
+	 exports.defaultTab = defaultTab
+
+	function addListToContainer( oContainer, list )
+	{
+		var type = null
+		var list = libVar.isArray(list) ? list : [list]
+		if (  libVar.hasattr( oContainer, 'activeTab' )  )  type = 'tab'
+		for( var iElement = 0, IElement = list.length;  iElement < IElement;  iElement++ )
+			switch (type)
+			{//TODO add addRow
+				case 'tab': oContainer.addTab( list[iElement] ); break
+				default   : oContainer.add   ( list[iElement] ); break
+			}
+	return oContainer
+	}exports.addListToContainer = addListToContainer
+
+
+	function containerOpen( oContainer, attributes, tab )
+	{
+		var attributes = exports.defaultAttributesOpenAndClose(attributes)
+Ti.API.info('Open ' + oContainer + ' with ' + attributes )
+		if (oContainer)
+		{// NOT currentWin!
+			var opener = tab || oContainer
+			if (tab)        tab.open( oContainer, attributes ) 	// for tabs
+			else	 oContainer.open(attributes)			    // for tabGroup or Window
+			opener.show()
+			oDepth.PLUS()
+Ti.API.info( libMem.RAM() )
+		}
+	return oContainer
+	}exports.containerOpen = containerOpen
+
+	function containerDispose( oContainer, level )
+	{
+		var level = level || 0
+		if(  oContainer.children  &&  ( oContainer.children.length > 0 )  &&  ( level < 1000 )  )
+			for ( var iChild = 0, IChild = oContainer.children.length;  iChild < IChild;  iChild++ )
+			{
+				var oElement = oContainer.children[iChild]
+					if (  oContainer.remove  &&  libVar.isType( oElement, 'TiViewProxy' )  )
+						  oContainer.remove(oElement) //diassociate oElement from oContainer
+	containerDispose( oElement, level +1 )
+			}
+Titanium.API.info( level + '.- Deleting ' + oContainer )
+	return libMem.dispose(oContainer)
+	}exports.containerDispose = containerDispose
+
+	function container_onClose(oContainer)
+	{
+		oDepth.MINUS() // We don't do it inside Dispose since it is recursive!
+exports.containerDispose(oContainer)
+	return oContainer
+	}exports.container_onClose = container_onClose
+
+	function containerClose( oContainer, attributes, tab )
+	{
+		var oContainer = exports.defaultWindow(oContainer)
+		var attributes = exports.defaultAttributesOpenAndClose(attributes)
+Ti.API.info('Close ' + oContainer + ' with ' + attributes )
+		if (oContainer)
+		{// since the above, it will always pass. We just leave it here for future mods
+			var closer = tab || oContainer
+			if (tab)	 tab.close( oContainer, attributes )
+			else		 oContainer.close(attributes)
+		}
+	return oContainer
+	}exports.containerClose = containerClose
+
+	function windowOpen ( win, attributes ) { exports.containerOpen ( win, attributes ) }
+	exports.windowOpen = windowOpen
+
+	function windowClose( win, attributes ) { exports.containerClose( win, attributes ) }
+	exports.windowClose = windowClose
+
+	function windowOpenModal( win, attributes )  { exports.containerOpen(  win,  libSequence.dictionaryUpdate( libSequence.defaultDictionary(attributes), { modal: true } )  ) }
+	 exports.windowOpenModal = windowOpenModal
+
+	function windowOpenFullscreen( win, attributes )  { exports.containerOpen( win, libSequence.dictionaryUpdate(  libSequence.defaultDictionary(attributes), { fullscreen: true } )  ) }
+	 exports.windowOpenFullscreen = windowOpenFullscreen
+
+	function tabOpen	( win, attributes, tab ) { exports.containerOpen ( win, attributes, exports.defaultTab(tab) ) }
+	 exports.tabOpen = tabOpen
+
+	function tabClose	( win, attributes, tab ) { exports.containerClose( win, attributes, exports.defaultTab(tab) ) }
+	 exports.tabClose = tabClose
+
+	function tabGroupOpen ( tabGroup, attributes ) { tabGroup.open(  libSequence.defaultDictionary( attributes, { transition: Titanium.UI.iPhone.AnimationStyle.FLIP_FROM_LEFT } )  ) }
+	 exports.tabGroupOpen = tabGroupOpen
+
+	function tabGroupClose( tabGroup, attributes ) { tabGroup.close(attributes) }
+	 exports.tabGroupClose = tabGroupClose
+
+	function currentWindowClose(attributes)		{ exports.windowOpen( Ti.UI.currentWindow, attributes ) }
+	exports.currentWindowClose = currentWindowClose
+
+	function windowOpenWithCurrentTab( win, attributes )  { exports.tabOpen( win, attributes, Ti.UI.currentTab ) }
+	exports.windowOpenWithCurrentTab = windowOpenWithCurrentTab
+
+	function windowCloseWithCurrentTab( win, attributes ) { exports.tabClose( win, attributes, Ti.UI.currentTab ) }
+	exports.windowCloseWithCurrentTab = windowCloseWithCurrentTab
+
+
+	function toggleNavBar(win)
+	{
+		var win = exports.defaultWindow(win)
+		if (win.navBarHidden) 	win.showNavBar()
+		else					win.hideNavBar()
+	return win
+	}exports.toggleNavBar = toggleNavBar
+
+	function createWindow(attributes)
+	{
+		var win = Ti.UI.createWindow( libSequence.defaultDictionary(attributes) )
+			win.addEventListener( 'close', function(e){ exports.container_onClose(win) } ) // This is the whole reason of having this function, so we can ensure that all windows on closure will dispose the memory
+	return  win
+	}exports.createWindow = createWindow
+
+	function createWindowModal(attributes)  { return exports.createWindow( libSequence.dictionaryUpdate( attributes, { modal: true } ) ) }
+	 exports.createWindowModal = createWindowModal
+
+// Just in case we want to do something fancy later on, like on createWindow
+	function createTab(attributes) { return Ti.UI.createTab(attributes) }
+	 exports.createTab = createTab
+
+	function createTabGroup(attributes) { return Ti.UI.createTabGroup(attributes) }
+	 exports.createTabGroup = createTabGroup
+
+
+	function createWindowAndTab( attrWindow, attrTab )
+	{
+		var win = exports.createWindow(attrWindow)
+		var tab = exports.createTab(  libSequence.defaultDictionary( attrTab, { window: win } )  )
+	return { win: win, tab: tab }
+	}exports.createWindowAndTab = createWindowAndTab
+
+	function createTabAndTabgroup( attrTab, attrTabgroup )
+	{
+		var tab      = exports.createTab(attrTab)
+		var tabGroup = exports.addListToContainer( exports.createTabGroup(attrTabgroup), [tab] )
+	return { tab: tab, tabGroup: tabGroup }
+	}exports.createTabAndTabgroup = createTabAndTabgroup
+
+	function createWindowAndTabAndTabgroup( attrWindow, attrTab, attrTabgroup )
+	{
+		var containers          = exports.createWindowAndTab(  libSequence.defaultDictionary( attrWindow, { tabBarHidden: true } ),  attrTab  )
+			tabGroup			= exports.createTabGroup(attrTabgroup)
+			tabGroup.addTab(containers.tab)
+			containers.tabGroup = tabGroup
+	return  containers
+	}exports.createWindowAndTabAndTabgroup = createWindowAndTabAndTabgroup
+
+
+	function createTabAndTabgroupByWin( win, attrTab, attrTabgroup )
+	{
+		var win = exports.defaultWindow(win)
+	return  libSequence.defaultDictionary(  exports.createTabAndTabgroup( libSequence.defaultDictionary( attrTab, { window: win } ), attrTabgroup ),  { win: win }  )
+	}exports.createTabAndTabgroupByWin = createTabAndTabgroupByWin
+

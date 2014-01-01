@@ -1,0 +1,89 @@
+require('src/include/require_once').monkeypatch(this)
+var variable = require('src/code/lib/var')
+var exports  = exports || {}
+
+	function DateDiff( oDate1, oDate2 ) { return oDate1.getTime() - oDate2.getTime() }
+	 exports.DateDiff = DateDiff
+
+	function DateDiffFromNow(oDate) { return DateDiff( new Date(), oDate ) }
+	 exports.DateDiffFromNow = DateDiffFromNow
+
+
+	function Today()
+	{
+		var oDate  = new Date() 
+		var oToday = new Date( oDate.getFullYear(), oDate.getMonth(), oDate.getDate() )
+		delete oDate
+	return oToday 
+	}exports.Today = Today
+
+	function Now()
+	{
+		var oTime = new Date()
+		var oNow  = new Date( oTime.getFullYear(), oTime.getMonth(), oTime.getDate(), oTime.getHours(), oTime.getMinutes(), oTime.getSeconds() )
+		delete oTime
+	}exports.Now = Now
+
+
+	function humanDate(oDate)
+	{
+		var dateData = [
+			{ value: oDate.getFullYear(), mask: 'yyyy', text: 'year'   },
+			{ value: oDate.getMonth()   , mask: 'm'   , text: 'month'  },
+			{ value: oDate.getDate()    , mask: 'd'   , text: 'day'    },
+			{ value: oDate.getHours()   , mask: 'H'   , text: 'hour'   },
+			{ value: oDate.getMinutes() , mask: 'M'   , text: 'minute' },
+			{ value: oDate.getSeconds() , mask: 's'   , text: 's'      }
+		]
+
+		function append( str, strNew )
+		{
+			if ( str.length > 0 )
+				str = ', ' + str
+		return str + strNew
+		}
+
+		for ( var iDate = 0, IDate = dateData.length, str = ''; 
+				  iDate    < IDate; 
+				  iDate++                                        )
+		{
+			var datePart = dateData[iDate]
+			if ( datePart > 0 )
+			{
+				var text = datePart.text
+				if ( datePart > 1 )
+					text += 's'
+				str = append( str, oDate.format(datePart.mask) + ' ' + text )
+			}
+		}
+	return str
+	}exports.humanDate = humanDate
+
+	function formatDate()
+	{
+		var oDate = new Date()
+		var  date = oDate.getFullYear() + '/' + oDate.getMonth() + '/' + oDate.getDate()
+		if ( oDate.getHours() >= 12 ) date += ' ' + ( libVar.isValue( oDate.getHours(), 12 ) ? oDate.getHours() : oDate.getHours() -12 ) + ':' + oDate.getMinutes() + ' PM'
+		else						  date += ' ' +   oDate.getHours()                                                                   + ':' + oDate.getMinutes() + ' AM'
+		delete oDate
+	return date
+	}exports.formatDate = formatDate
+
+
+	function past_present_future( list, propertyDateStart, propertyDateEnd )
+	{
+		var oNow    = new Date()
+		var list    = list || []
+		var past    = []
+		var present = []
+		var future  = []
+		for ( var iList = 0; iList < list.length; iList++ )
+		{
+			var row = list[iList]
+			if      (  Date.parse( row[propertyDateStart] )  >  oNow.getTime()  )  future.push(row)
+			else if (  Date.parse( row[propertyDateEnd]   )  <  oNow.getTime()  )    past.push(row)
+			else																  present.push(row)
+		}
+		delete oNow
+	return [ past, present, future ]
+	}exports.past_present_future = past_present_future

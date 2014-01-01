@@ -1,0 +1,412 @@
+Ti.API.info('>>> BEGIN OF CUSTOM')
+
+	oUser = new (function()
+	{
+		var USER = 'user'
+
+		this.GET = function() { return Ti.App.Properties.getString(USER) || null }
+		this.SET = function(string)
+					{
+							Ti.App.Properties.setString( USER, string )
+					return this.GET()
+					}
+
+		this.ON = function() { return ( this.GET() ) ? true : false }
+	})()
+
+	function createAndOpenTabs()
+	{
+		me.user       =            users[me.id]
+		me.badges     =     users_badges[me.id]
+		me.friends    =    users_friends[me.id]
+		me.promotions = users_promotions[me.id]
+
+		function getResource(path)  { return Ti.Filesystem.getFile( libFS.paths.common.resources, path ) }
+		function getIconPath(path)  { return '/src/cfg/img/' + path + '.png' }
+		function getIconBadge(ID)   { return '/src/mock/cache/badge/' + ID + '.png' }
+		function getIconBadgeAny()  { return getIconPath('badge') }
+		function getIconAvatar(ID) 	{ return '/src/mock/cache/avatar/' + ID + '.png' }
+		function getIconAvatarAny() { return getIconPath('avatar') }
+		function name( nameGiven, nameFamily ) { return nameFamily + ', ' + nameGiven }
+		function createBadgeImage( ID, attributes )
+		{
+			var image = (ID) ? getIconBadge(ID) : getIconBadgeAny()
+		return Ti.UI.createImageView(  libSequence.defaultDictionary( { image: image, defaultImage: getIconPath('badge')  }, attributes )  )
+		}
+
+		oNotificationsUnread = new (function()
+		{//Singleton to check Unread notifications
+			var NOTIFICATIONS_UNREAD = 'notificationsUnread'
+	
+			this.GET   = function() { return [ 1, 2 ] } //XXX this is just POC! { return Ti.App.Properties.getInt(NOTIFICATIONS_UNREAD) || [] }
+			this.COUNT = function()
+							{ 
+								var iNotification = this.GET()
+							return  iNotification.length 
+							}
+	
+			this.HAS   = function() { return ( this.COUNT() > 0 ) }
+			this.SET   = function(array)
+							{
+								if ( libVar.isArray(array) )
+								{
+									Ti.App.Properties.setBool( NOTIFICATIONS_UNREAD, array )
+							return  this.GET()
+								}
+							return null
+							}
+	
+			this.ADD = function(input) 
+						{
+							var 		 notifications = this.GET()
+										 notifications.push(input)
+						return  this.SET(notifications)
+						}
+		})()
+	
+		oNotificationsUnchecked = new (function()
+		{//Singleton to chek unchecked notifications
+			var NOTIFICATIONS_UNCHECKED = 'notificationsUnchecked'
+	
+			this.GET = function() { return Boolean( Ti.App.Properties.getBool(NOTIFICATIONS_UNCHECKED) || false ) }
+			this.SET = function(bool)
+						{
+							Ti.App.Properties.setBool( NOTIFICATIONS_UNCHECKED, Boolean(bool) )
+						return  this.GET()
+						}
+		})()
+
+	// HEADER
+		var oNotificationsLabel = Ti.UI.createLabel( { text: oNotificationsUnread.COUNT(), left: 13, zIndex: 2 } )
+		var vNotifications      = libUI.createViewByList( [ Ti.UI.createImageView( { image: getIconPath('notifications'), left: 0, zIndex: 1 } ), oNotificationsLabel ], { opacity: 0 } )
+			vNotifications.animate({ duration: 0, opacity: 0, visible: true })
+		var vHeader             = libUI.createViewHorizontalByList( [ Ti.UI.createImageView( { image: getIconPath('logo'), left: 0, width: 120, height: 40 } ), vNotifications ], { left: 5, width: 'auto' } )
+		var vDummy              = Ti.UI.createView( { width: 0, height: 0 } )
+		function createButton_Refresh(fn) { return libUI.createButton( fn, { systemButton: Titanium.UI.iPhone.SystemButton.REFRESH } ) }
+		function notificationsHeader(attributes) { return libSequence.defaultDictionary( attributes, { leftNavButton: vHeader, titleControl: vDummy, rightNavButton: createButton_Refresh() }  ) }
+
+        function searchForNotifications()
+        {	
+			if (libOS.isIOS)
+			{
+				function onNotification_iOS()
+				{
+					var  duration  = 1000
+					function fade(input) { vNotifications.animate( { opacity: Boolean(input), duration: duration } ) }
+					oNotificationsLabel.text = oNotificationsUnread.COUNT()
+					fade( oNotificationsUnread.HAS() )
+				}
+			}
+		
+			if (libOS.isAndroid)
+			{
+				function onNotification_android()
+				{
+					if ( oNotificationsUnchecked.GET() )
+					{
+						var msg = libString.sprintf( '%d New promotions', oNotificationsUnread.COUNT() )
+		libAndroid.createNotificationToastAndShow(msg)
+		//libAndroid.createNotificationTaskAndNotify( { thumb: 'appicon', contentTitle: 'PromoIt', contentText: msg } )
+					}
+				}
+			}
+
+Ti.API.info('~ Are we there yet?')
+            if (  oNotificationsUnchecked.GET()  &&  ( oNotificationsUnread.HAS() )  )
+            {
+				if (libOS.isIOS)     onNotification_iOS()
+				if (libOS.isAndroid) onNotification_android()
+				oNotificationsUnchecked.SET(false)
+            }
+        }
+
+		var tabGroup   = libContainer.createTabGroup()
+	
+		var oDashboard  = createControl_DashBoard()
+	//	var oBadges     = createControl_Badges() //It scrambles everything when closing
+		var oBadgesList = createControl_BadgesList()
+		var oPromos     = createChart(1)
+		var oConnect    = createControl_Connect()
+		var oProfile    = createControl_Profile()
+	
+		function createWindowByControl		( oView, attributes ) { return libUI.createWindowByView( oView, attributes ) }
+		function createWindowByControlForTab( oView, attributes ) { return createWindowByControl( oView, notificationsHeader(attributes) ) }
+		function createWindowByControlSmart ( oView, useTab, attributes ) { return useTab ? createWindowByControlForTab( oView, attributes ) : createWindowByControl( oView, attributes ) }
+		function createWindow_Dashboard (useTab) { return createWindowByControlSmart( oDashboard            , useTab, { title: 'Dashboard' } ) } // This title: is for the new windows to have the back button!
+		function createWindow_Badges    (useTab) { return createWindowByControlSmart( createControl_Badges(), useTab ) }
+		function createWindow_BadgesList(useTab) { return createWindowByControlSmart( oBadgesList           , useTab, { title: 'Badges Earned' } ) }
+		function createWindow_Promos    (useTab) { return createWindowByControlSmart( oPromos               , useTab ) }
+		function createWindow_Connect   (useTab) { return createWindowByControlSmart( oConnect              , useTab, { title: 'Following' } ) }
+		function createWindow_Profile   (useTab) { return createWindowByControlSmart( oProfile              , useTab, { title: 'Profile' } ) }
+	
+		var tDashboard = libContainer.createTab(  { title: 'Dashboard', icon: getIconPath('dashboard'), window: createWindow_Dashboard(true) }  )
+		var tBadges    = libContainer.createTab(  { title: 'Badges'   , icon: getIconPath('badges')   , window: createWindow_Badges   (true) }  )
+		var tPromos    = libContainer.createTab(  { title: 'Promos'   , icon: getIconPath('promos')   , window: createWindow_Promos   (true) }  )
+		var tConnect   = libContainer.createTab(  { title: 'Connect'  , icon: getIconPath('connect')  , window: createWindow_Connect  (true) }  )
+		var tProfile   = libContainer.createTab(  { title: 'Profile'  , icon: getIconPath('profile')  , window: createWindow_Profile  (true) }  )
+	
+		tabGroup.addTab(tDashboard)
+		tabGroup.addTab(tPromos)
+		tabGroup.addTab(tBadges)
+		tabGroup.addTab(tConnect)
+		tabGroup.addTab(tProfile)
+
+		function createAndOpenWindow_Notifications()
+		{
+			var win = libUI.createAndOpenWindowModal( 'foo', 1, oTable, true )
+		}
+
+		function createAndOpenWindow_Notification( ID, tab )
+		{
+			var notification = notifications[ID]
+			var win          = libContainer.createWindow({ title: 'Notification', backgroundColor: 'white' } )
+	//			win.title    = notification.title 
+				win.add(  libContainer.addListToContainer( libUI.createViewVertical(), [  libContainer.addListToContainer(  Ti.UI.createScrollView( { contentHeight: 'auto' } ),  [  libContainer.addListToContainer( libUI.createViewVertical(), [    Ti.UI.createLabel({ text: notification.title }),  Ti.UI.createLabel({ text: notification.description }), libUI.createButtonLabel( 'Delete Notification', function(e) { libContainer.windowClose(win) }, { width: '100%', height: 30 } )  ] )  ]  )  ] )   )
+libContainer.tabOpen( win, null, tab )
+		}
+
+		function createWindowWithBackButtonAndOpen( title, oView ) { libContainer.windowOpenModal( libUI.createWindowModalWithCloseButtonByView( oView, { title: title, backgroundColor: 'gray' }, { title: 'Back' } ) ) } 
+
+
+		function createWindowAndOpen_Badge(ID)
+		{
+			var badge    = badges[ID]
+			var achieved = me.badges[ID] || null
+				achieved = achieved ? new Date(achieved).toLocaleDateString() : null
+			var labels   = [ libUI.createLabel( badge.header, { top: 3, left: 0, font: { fontWeight: 'bold' } } ), libUI.createLabel( badge.description, { top: 3, left: 0 } ) ]
+			if (achieved)
+				libSequence.addItemToListAsFirst(  labels, libUI.createLabel( 'Achieved: ' + achieved, { right: 5, font: { fontSize: 10 } } )  )  
+		createWindowWithBackButtonAndOpen( badge.title, libUI.createViewHorizontalByList( [ createBadgeImage( ID, { top: 0, width: 70 } ), libUI.createScrollviewByView( libUI.createViewVerticalByList(labels) ) ], { width: '90%', height: '90%', borderColor: 'black', borderRadius: 10, borderWidth: 1, backgroundColor: 'white' } ) )
+		}
+
+
+		function createProgressBarWithTitle( title, ID, max, value ) { return libContainer.addListToContainer(    libUI.createViewVertical(),   [  libContainer.addListToContainer( libUI.createViewHorizontal(), [ libUI.createLabel( title ), libUI.createLabel( 'LEADER' ) ] ),  libUI.createProgressBar( 0, max, value )  ]   )  }
+	
+		function createPromoPerformance( ID, person )
+		{
+			var promotion   = promotions[ID]
+			var performance = users_promotions[person][ID]
+			var data = [ { className: 'total', title: 'TOTAL POINTS'          , max: promotion.top, value: performance.points },
+						 { className: 'UPH'  , title: 'AVERAGE SALES PER HOUR', max: promotion.UPH, value: performance.UPH    } ]
+			for ( var iData = 0, rows = []; iData < data.length; iData++ )
+			{
+				var row = data[iData]
+					rows.push(  createProgressBarWithTitle( row.className, ID, row.max, row.value )  )
+			}
+		return libUI.createTableviewsectionByList( 'performance', ID, '', rows )
+		}
+	
+		function createPromoDescription( ID, person )
+		{
+			var promotion    = promotions[ID]
+			var performance  = users_promotions[person][id]
+			var oTitle       = libUI.createLabel(  promotion.title )
+			var oPrize       = libUI.createLabel(  promotion.prize )
+			var oRemain      = libUI.createLabel(  libDate.humanDate( Date.parse(promotion.dateStart) )  )
+			var oDescription = libUI.createLabel(  ID,  promotion.description )
+		return libUI.createTableviewsectionByList( '', [ libContainer.addListToContainer(  libUI.createViewVertical(),  [ oTitle, oPrize, oRemain, oDescription ]  ) ] )
+		}
+	
+		function createChart(ID)
+		{
+			var data   = data || []
+			var width  = 300
+			var height = 225
+			var URL = 'http://chart.apis.google.com/chart?chxr=0,0,46&chxt=y&chs=' + width + 'x' + height + '&cht=lc&chco=3D7930&chd=s:Xhiugtqi&chg=14.3,-1,1,1&chls=2,4,0&chm=B,C5D4B5BB,0,0,0&chtt=WEEKLY+STATISTICS'
+		return Ti.UI.createImageView( { image: URL, width: width, height: height } )
+		}
+	
+	
+		function createControl_DashBoard()
+		{
+			function windowDashboardOpen(win) { return libContainer.tabOpen( win, null, tDashboard ) }
+
+			var listOfBadges  = libSequence.keys(me.badges)
+			var listOfFriends =                  me.friends
+
+			var rowsDashboard = [
+				{ id: 'promotions', title: 'Current Promotions'                                             , hasChild: true },
+				{ id: 'future'    , title:  'Future Promotions'                                             , hasChild: true },
+				{ id: 'friends'   , title: libString.sprintf( 'Following %d Friends', listOfFriends.length ), hasChild: true, fn: function(){ windowDashboardOpen( createWindow_Connect()    ) } },
+				{ id: 'badges'    , title: libString.sprintf( '%d Badges Unlocked'  ,  listOfBadges.length ), hasChild: true, fn: function(){ windowDashboardOpen( createWindow_BadgesList() ) } }
+			]
+
+			function pendingNotifications( iList, list )
+			{
+				var key          = list[iList]
+				var notification = notifications[key]
+			return { id: key, title: notification.title, hasChild: true, fn: function(e) { createAndOpenWindow_Notification( key, tDashboard ) } }
+			}
+		return libUI.createTable( { data: libUI.listOfTablerowsByDictionaries( [ { header: 'DASHBOARD', rows  : rowsDashboard }, { header: 'NOTIFICATIONS', rows  : libSequence.map( pendingNotifications, libSequence.keys(notifications) ) } ] ), grouped: true }, function(){return true} )
+		}
+
+		function createControl_BadgesList()
+		{// Shows a list of only the badges you have earned
+			var badgesIDs = libSequence.keys(me.badges)
+			var rows = []
+			function badgesList( iList, list )
+			{
+				ID    = list[iList]
+				badge = badges[ID]
+			return { leftImage: createBadgeImage(ID), badgeID: ID, title: badge.title, hasChild: true }
+			}
+		return libUI.createTable( { grouped: true, data: libSequence.map( badgesList, badgesIDs ), onClick: function(e) { createWindowAndOpen_Badge(e.rowData.badgeID) }  } )
+		}
+
+		function createControl_Badges()
+		{//TODO display badges to be earned
+			var badgeIDs = libSequence.keys(me.badges)
+			var rows = []
+			for ( var iBadge = 0, IBadge = badgeIDs.length;  iBadge < IBadge;  iBadge++ )
+			{
+				var  width    = 100
+				var  height   =  60
+				var  ID       = badgeIDs[iBadge]
+				var  row      = badges[ID]
+				var vVertical = libUI.createViewVerticalByList( [ createBadgeImage( ID, { width: width, height: height } ), Ti.UI.createLabel( { text: row.title } ) ], { width: width, height: height +20, margin: 10 }  )
+					vVertical.addEventListener( 'click', function(e) { createWindowAndOpen_Badge(ID) } )
+				rows.push(vVertical)
+			}
+		return libContainer.addListToContainer(   Ti.UI.createScrollView( { contentWidth: '100%', contentHeight: 'auto', height: '100%', backgroundColor: 'white' } ),   [ libUI.createViewHorizontalByList( rows, { width: '100%', height: 'auto' } )  ] )
+		}
+	
+		function createControl_Connect()
+		{//TODO put the 2 for into 1 single function
+			function friendsFollowing( iList, list )
+			{
+				friendID = list[iList]
+				friend   = users[friendID]
+			return { leftImage: getIconAvatarAny(friendID), title: name( friend.nameGiven, friend.nameFamily ), rightImage: getIconPath('chat') }
+			}
+
+			function friendsSuggested( iList, list )
+			{
+				friendID = list[iList]
+				friend   = users[friendID]
+			return { leftImage: getIconAvatarAny(friendID), title: name( friend.nameGiven, friend.nameFamily ), rightImage: getIconPath('add') }
+			}			
+		return libUI.createTable( { data: libUI.listOfTablerowsByDictionaries( [ { header: libString.sprintf( 'FOLLOWING %d FRIENDS', me.friends.length ), rows: libSequence.map( friendsFollowing, me.friends ) }, { header: 'SUGGESTED FRIENDS', rows: libSequence.map( friendsSuggested, me.suggested ) } ] ), grouped: true }, function(){return true} )
+		}
+	
+	
+		function createControl_Profile()
+		{
+			function windowSettingsOpen(win) { return libContainer.tabOpen( win, null, tProfile ) }
+
+			var oSettingsNotification = (function()
+			{// Page 33 PromoIt v3
+				data = [
+					{ title: 'Preferred Alert Method', option: 'EMail' },
+					{ title: 'Daily Notifications'   , option: 'No'    },
+					{ title: 'Manage Alerts'         , option: 'Yes'   }
+				]
+				function settings( iList, list )
+				{
+					var row = list[iList]
+				return libUI.createTableviewrowByView(   libContainer.addListToContainer(  Ti.UI.createView({ width: '100%', height: 40 }), [ libUI.createLabel(row.title, { left: 5 }), libUI.createLabel( row.option, { right: 5, font: { fontWeight: 'bold' } } ) ]  )  )
+				}
+			return libUI.createTable( { data: libSequence.map( settings, data ), grouped: true } )
+			})()
+	
+		
+			var oSettingsProfile = (function()
+			{
+				data = [
+					{ 
+						header: null, 
+						rows: [
+							{ title: 'Your Profile'      , hasChild: true },
+							{ title: 'Change Password'   , hasChild: true },
+							{ title: 'Privacy Settings'  , hasChild: true }
+						]
+					},
+					{
+						rows: [
+							{ title: 'Terms & Conditions', hasChild: true },
+							{ title: 'About us'          , hasChild: true }
+						]
+					},
+					{
+						rows: [
+							{ title: 'Logout', hasChild: true }
+						]
+					}
+				]
+			return libUI.createTable( { data: libUI.listOfTablerowsByDictionaries(data), grouped: true } )
+			})()
+
+			var listOfBadges  = libSequence.keys(me.badges)
+			var listOfFriends =                  me.friends
+
+			var records = [
+				{ hasChild: true, title:                    cfg.profile.ranks                                , fn: null },
+				{ hasChild: true, title: libString.sprintf( cfg.profile.badges       ,  listOfBadges.length ), fn: function() { windowSettingsOpen( createWindow_BadgesList() ) } },
+				{ hasChild: true, title: libString.sprintf( cfg.profile.friends      , listOfFriends.length ), fn: function() { windowSettingsOpen( createWindow_Connect()    ) } },
+				{ hasChild: true, title:                    cfg.profile.promotions                           , fn: null },
+				{ hasChild: true, title:                    cfg.profile.notifications                        , fn: function() { windowSettingsOpen(  libUI.createWindowByView( oSettingsNotification, { title: 'Notification Settings' } )  ) }  },
+				{ hasChild: true, title:                    cfg.profile.settings                             , fn: function() { windowSettingsOpen(  libUI.createWindowByView( oSettingsProfile     , { title: 'Profile Settings'      } )  ) } }
+			]
+		return libUI.createTable( { data: records, grouped: true, headerView: libUI.createViewHorizontalByList( [ Ti.UI.createImageView({ image: getIconAvatarAny(friendID), width: 100, height: 100 }),   libUI.createViewVerticalByList( [ libUI.createLabel( name( me.user.nameGiven, me.user.nameFamily ), { font: { fontWeight:'bold' } } ),  libUI.createLabel( 'Highest rank: ' + me.user.rank ) ], { width: 200 } )   ], { top: 10, height: 70 } ) } )
+		}
+
+
+libContainer.tabGroupOpen(tabGroup)
+
+setInterval( searchForNotifications, 3000 )
+//XXX PcC
+oNotificationsUnchecked.SET(true)
+	}
+
+
+
+
+	function createAndOpenWindowLogin()
+	{
+		function onLogIn(list)
+		{
+			for ( var iWin = 0, IWin = list.length;  iWin < IWin;  iWin++ )
+				libContainer.containerClose( list[iWin] )
+			createAndOpenTabs()
+		}
+
+		function onLogged(win)
+		{
+			onLogIn([win])
+		}
+
+		function createAndOpenWindowLoginAPI(oContainer)
+		{
+			var width		= 200
+			var win         = libContainer.createWindow( { title: cfg.logIn_API.titleWindow } )
+			if (libOS.isIOS)
+				win.backgroundColor = 'white'
+			var fields = libUI.createInputCredentials( { usr: 'User name', pwd: 'PassWord' }, { width: width, left: 0 } )
+				win.leftNavButton  = libUI.createButtonLabel( 'Back', function(){ libContainer.windowClose(win) } )
+				win.rightNavButton = libUI.createButtonLabel( 'Done', function()
+																	{ 
+																		fields.usr.blur()
+																		fields.pwd.blur()
+onLogIn( [ win, oContainer ] ) //XXX just PoC
+																	} )
+			libContainer.addListToContainer( win, [ libContainer.addListToContainer( libUI.createViewVertical(), [ fields.usr, fields.pwd ] )  ]  )
+			libContainer.windowOpenModal(win)
+		}
+
+
+		var width = 160
+			win = libContainer.createWindow( { title: cfg.logIn.titleWindow } )
+		if (libOS.isIOS) 
+			win.backgroundColor = 'white'
+		win.add( libContainer.addListToContainer(  libUI.createViewVertical({ width: '70%' }), [  libUI.createLabel( cfg.logIn.title, { left: 0, font: { fontWeight: 'bold', fontSize: 17 } } ), libUI.createLabel( cfg.logIn.detail, { top: 5, height: 100 } ), libUI.createFacebookButton( null, onLogged, null, null, { width: width, isWide: true, top: 10 } ), libUI.createButtonLabel( cfg.logIn.button, function(){ onLogged(win) }, { width: width, top: 5 } ), libUI.createHyperLink( cfg.logIn.terms.title, cfg.logIn.terms.URL, cfg.logIn.terms.HTML, { left:0, top: 20 } ) ]  )   )
+libContainer.windowOpenModal(win)
+	}
+
+
+	function init()
+	{
+	if ( oUser.ON() )	createAndOpenTabs()
+/* else */				createAndOpenWindowLogin()
+	}
+
+
+Ti.API.info('>>> END OF CUSTOM')

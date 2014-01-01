@@ -1,0 +1,29 @@
+require('src/include/require_once').monkeypatch(this)
+var mem      = require('src/code/lib/mem')
+var variable = require('src/code/lib/var')
+var exports  = exports || {}
+
+	function HTTPonDone( oHTTP, fn, fnArgs )
+	{// We separate this functionallity so we can deallocate oHTTP after usage
+		var fnArgs = fnArgs || []
+		fn.apply( this, fnArgs )
+mem.dispose(oHTTP)
+	}exports.HTTPonDone = HTTPonDone
+
+	function HTTP( URL, method, timeout, onload, onerror )
+	{//TODO add Cache!
+		var onload        = onload         || {}
+		var onloadFn      = onload.fn      || null
+		var onloadFnArgs  = onload.fnArgs  || []
+		var onerror		  = onerror        || {}
+		var onerrorFn     = onerror.fn     || null
+		var onerrorFnArgs = onerror.fnArgs || []
+		var timeout       = timeout        || 0
+		var method        = method         || 'GET'
+		var oHTTP         = Ti.Network.createHTTPClient()
+		if ( variable.isFunction( onloadFn) )	oHTTP.onload  = exports.HTTPonDone( oHTTP,  onloadFn,  onloadFnArgs )
+		if ( variable.isFunction(onerrorFn) )	oHTTP.onerror = exports.HTTPonDone( oHTTP, onerrorFn, onerrorFnArgs )
+		if ( timeout > 0 )						oHTTP.timeout = timeout
+		oHTTP.open( method, URL )
+		oHTTP.send()
+	}exports.HTTP = HTTP

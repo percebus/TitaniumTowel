@@ -1,0 +1,161 @@
+require('src/include/require_once').monkeypatch(this)
+var mem      = require('src/code/lib/mem')
+var os       = require('src/code/lib/os')
+var sequence = require('src/code/lib/sequence')
+var variable = require('src/code/lib/var')
+var exports  = exports || {}
+
+
+	function file( path, useBackup )
+	{
+		var useBackup = useBackup || false
+		var oF = Ti.Filesystem.getFile(path)
+			oF.setRemoteBackup(useBackup) // very important to avoid app rejection!
+	return  oF
+	}exports.file = file
+
+	function android_copy( src, dst )
+	{
+		var oF = exports.file(src)
+		if (oF.copy)
+		{// Android only
+		 	oF.copy(dst)
+mem.dispose(oF)
+	return exports.file(dst)
+		}
+	return null
+	}exports.android_copy = android_copy
+
+	function fileIfExists(path)
+	{
+		var oF = exports.file(path)
+	return  oF.exists() ? oF : null
+	}exports.fileIfExists = fileIfExists
+
+	function fileRON(path)
+	{
+		var oF = exports.file(path)
+		if ( !oF.exists() )
+			variable.callIfFunction(oF.createFile) // only works on iOS
+	return  oF
+	}exports.fileRON = fileRON
+
+	function folderRON(path)
+	{
+		var oF = exports.file(path)
+		if ( !oF.exists() )
+			oF.createDirectory()
+	return  oF
+	}exports.folderRON = folderRON
+
+	function fileCopy( src, dst )
+	{ 
+		   exports.android_copy( src, dst ) // tries to copy (android only)
+	return exports.fileRON(dst) 			// gets or create (iPhone only)
+	}exports.fileCopy = fileCopy
+
+	function folderCopy( src, dst )
+	{
+		   exports.android_copy( src, dst ) // tries to copy(android only)
+	return exports.folderRON(dst) 			// gets
+	}exports.folderCopy = folderCopy
+
+
+	function pathBuild() // arguments
+	{
+		var list = sequence.cleanList(arguments)
+		for ( var iFolder = 0, IFolder = list.length, path = ''; 
+				  iFolder   <  IFolder; 
+				  iFolder++                                         )
+		{
+			var  folder = list[iFolder]
+			if ( folder.length > 0 )
+			{
+				path += folder
+				if (  !variable.isValue( sequence.charLast(path), Ti.Filesystem.separator )   )
+					path += Ti.Filesystem.separator
+			}
+		}
+	return ( path.length > 0 ) ? path : null
+	}exports.pathBuild = pathBuild
+
+	function pathParent(path) 
+	{
+		var path = path || ''
+		if (  variable.isValue(  sequence.charFirst(path),  Ti.Filesystem.separator  )   )
+		   path = path.slice( sequence.indexFirst(path), path.length-1 ) // remove last /
+	return sequence.left( path, path.lastIndexOf('/')+1 ) // remove everything until next 
+	}exports.pathParent = pathParent
+
+
+	function pathExternal() { return ( os.isAndroid && Ti.Filesystem.isExternalStoragePresent() ) ? Ti.Filesystem.externalStorageDirectory : null }
+	 exports.pathExternal = pathExternal
+Ti.API.info('external drive: ' + exports.pathExternal() )
+
+	function pathApp() { return os.isIOS ? Ti.Filesystem.applicationDirectory : null }
+	 exports.pathApp = pathApp
+
+	function pathSupport() { return os.isIOS ? Ti.Filesystem.applicationSupportDirectory : null }
+	 exports.pathSupport = pathSupport
+
+	function pathResources() { return Ti.Filesystem.resourcesDirectory }
+	 exports.pathResources = pathResources
+
+	function pathTemp() { return Ti.Filesystem.tempDirectory }
+	 exports.pathTemp = pathTemp
+
+	function pathData() { return Ti.Filesystem.applicationDataDirectory }
+	 exports.pathData = pathData
+
+	function pathBase() { return exports.pathParent(Ti.Filesystem.applicationDataDirectory) }
+	 exports.pathBase = pathBase
+
+	function pathLib() { return exports.pathParent(Ti.Filesystem.applicationCacheDirectory) }
+	 exports.pathLib = pathLib
+
+	function pathPrivate() { return exports.pathBuild( exports.pathLib(), 'Private%20Documents' ) }
+	 exports.pathPrivate = pathPrivate
+
+	function pathDB() { return exports.pathPrivate() }
+	 exports.pathDB = pathDB
+
+	function pathCache() { return Ti.Filesystem.applicationCacheDirectory }
+	 exports.pathCache = pathCache
+
+	function pathDBfile(dbName) { return exports.pathDB() + exports.DBfileName(dbName) }
+	 exports.pathDBfile = pathDBfile
+
+	function pathDocs() { return exports.pathExternal() ? exports.pathBuild( exports.pathExternal(), 'Documents' ) : exports.pathData() }
+	 exports.pathDocs = pathDocs
+
+	function pathSettings() { return exports.pathBuild(  sequence.firstValid( [ exports.pathExternal(), exports.pathSupport(), exports.pathData() ] ),  'Settings'  ) }
+	 exports.pathSettings = pathSettings
+
+
+	function DBfileName(dbName)
+	{
+		if (os.isIOS)
+			dbName += '.sql'
+	return  dbName
+	}exports.DBfileName = DBfileName
+
+	var paths = {
+		base     : exports.pathBase(),
+		lib      : exports.pathLib(),
+		priv     : exports.pathPrivate(),
+		app      : exports.pathApp(),
+		resources: exports.pathResources(),
+		support  : exports.pathSupport(),
+		temp     : exports.pathTemp(),
+		cache    : exports.pathCache(),
+		data     : exports.pathData(),
+		docs     : exports.pathDocs(),
+		DB       : exports.pathDB(),
+		settings : exports.pathSettings()
+	}
+
+	if ( os.isAndroid )
+		paths.external = exports.pathExternal//()
+exports.paths = paths
+
+Ti.API.info(exports.paths)

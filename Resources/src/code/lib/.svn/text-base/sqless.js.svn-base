@@ -1,0 +1,29 @@
+require('src/include/require_once').monkeypatch(this)
+var fs  = require('src/code/lib/fs')
+var mem = require('src/code/lib/mem')
+
+	var EXT = EXT || '.json'
+
+	function SQLessPath( DBfolder, tableFile, ext ) { return Ti.Filesystem.getFile(  fs.pathDB(),  DBfolder,  tableFile + ( ext || EXT )  ) }
+	 exports.SQLessPath
+
+	function SQLessDB( DBname, ext )
+	{// This class will handle JSON storing and retrieval
+		var DBname = DBname || 'SQLess'
+
+		this.read = function(tableName)
+					{// get data
+						var oF    = exports.SQLessPath( DBname, tableName, ext )
+						var  data = JSON.parse( oF.read() )
+mem.dispose(oF) // we could leave it... or we could KILL IT!
+					return JSON.parse(data)
+					}
+
+		this.write = function( tableName, data )
+						{
+							var oF = exports.SQLessPath( DBname, tableName, ext )
+								oF.write( JSON.stringify(data) )
+						return  oF
+						}
+
+	}exports.SQLessDB = SQLessDB

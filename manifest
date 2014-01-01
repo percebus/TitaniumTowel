@@ -1,8 +1,8 @@
-#appname: Towel
-#publisher: JC
-#url: http://github.com/percebus
-#image: appicon.png
-#appid: com.JCystems.titanium.towel
-#desc: undefined
-#type: ipad
-#guid: 48bab5ba-7467-4021-a427-85b39542ada0
+#appname:Towel
+#publisher:JC
+#url:http://github.com/percebus
+#image:appicon.png
+#appid:com.JCystems.titanium.towel
+#desc:not specified
+#type:ipad
+#guid:48bab5ba-7467-4021-a427-85b39542ada0

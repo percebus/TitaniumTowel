@@ -1,0 +1,92 @@
+10
+
+dir
+12
+https://f11.svn.beanstalkapp.com/promoit/trunk/mobile/Resources/src
+https://f11.svn.beanstalkapp.com/promoit
+
+
+
+2012-06-16T17:29:56.562715Z
+11
+jacobbeckley
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+b11c309c-004c-40a7-a9cc-4b05fad06d4c
+
+cfg
+dir
+
+code
+dir
+
+data.js
+file
+13
+
+
+delete
+2012-06-19T01:35:46.000000Z
+789bba306a8069cb696bf79ffd2cad6e
+2012-06-19T02:02:57.500147Z
+13
+jacobbeckley
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+31
+
+include
+dir
+
+mock
+dir
+
+
+
+delete
+
+old
+dir
+
+
+
+add
+
+page
+dir
+
+
+
+delete
+

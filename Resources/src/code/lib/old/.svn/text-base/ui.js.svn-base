@@ -1,0 +1,425 @@
+require('src/include/require_once').monkeypatch(this)
+var libContainer = require('src/code/lib/container')
+var libDate      = require('src/code/lib/date')
+var libOS        = require('src/code/lib/os')
+var libSequence  = require('src/code/lib/sequence')
+var libVar       = require('src/code/lib/var')
+var exports   = exports || {}
+
+
+	if (libOS.isIOS)
+	{
+		function iOS_createCancelAndDoneToolbar( id, fnCancel, fnDone, attributes, buttonsStyle )
+		{
+			var buttonsStyle = buttonsStyle || Ti.UI.iPhone.SystemButtonStyle.BORDERED
+			var buttons      = []
+	
+			if ( libVar.isType( fnCancel, 'function' ) )
+			{
+				var oCancel = Ti.UI.createButton(  addSelectorsToAttributes( 'keyboard_cancel', id, { title: 'Cancel', style: buttonsStyle } )  )
+					oCancel.addEventListener( 'click', fnCancel )
+				buttons.push(oCancel)
+			}
+	
+			buttons.push(  Ti.UI.createButton( { systemButton: Ti.UI.iPhone.SystemButton.FLEXIBLE_SPACE } )  )
+	
+			if ( libVar.isType( fnDone, 'function' ) )
+			{
+				var oDone = Ti.UI.createButton(  addSelectorsToAttributes( 'keyboard_done', id, { title: 'Done', style: buttonsStyle } )  )
+					oDone.addEventListener( 'click', fnDone )
+				buttons.push(oDone)
+			}
+
+			var attributes       = addSelectorsToAttributes( 'iOS_toolBar', id, attributes )
+				attributes.items = buttons
+			   oToolBar = Ti.UI.iOS.createToolbar(attributes)
+		return oToolBar
+		}exports.iOS_createCancelAndDoneToolbar = iOS_createCancelAndDoneToolbar
+	}
+
+	function classId( className, id )  { return className + '_' + ( id || 1 )  }
+	exports.classId = classId
+
+	function addSelectorsToAttributes( className, id, attributes ) { return libSequence.defaultDictionary( attributes, { className: className, id: exports.classId( className, id ) } ) }
+	exports.addSelectorsToAttributes = addSelectorsToAttributes
+
+
+	function defaultAttributesRanges( min, max, value,  attributes ) { return  libSequence.defaultDictionary( attributes, { min: min, value: value, max: max } ) }
+	exports.defaultAttributesRanges = defaultAttributesRanges
+
+
+    function createSlider		( min, max, value, attributes ) { return Ti.UI.createSlider     (  exports.defaultAttributesRanges( min, max, value, attributes )  ) }
+     exports.createSlider = createSlider
+
+    function createProgressBar	( min, max, value, attributes ) { return Ti.UI.createProgressBar(  exports.defaultAttributesRanges( min, max, value, attributes )  ) }
+     exports.createProgressBar = createProgressBar
+
+	function createButton( fn, attributes )
+	{ 
+		var oButton = Ti.UI.createButton( libSequence.defaultDictionary(attributes) )
+		if ( libVar.isFunction(fn) )
+			oButton.addEventListener( 'click', fn )
+	return  oButton
+	}exports.createButton = createButton
+
+	function createButtonLabel ( title, fn, attributes ) { return exports.createButton(  fn,  libSequence.defaultDictionary( attributes, { title: title } )  )  }
+	 exports.createButtonLabel = createButtonLabel
+
+
+	function createLabel( text, attributes ) { return Ti.UI.createLabel(  libSequence.defaultDictionary( attributes, { text: text } )  )  }
+	exports.createLabel = createLabel
+
+	function createLabelHTMLorText( HTML, defaultText, attributes )
+	{
+		var attributes = libSequence.defaultDictionary(attributes)
+		if (libOS.isAndroid)	attributes.html = HTML
+		else					attributes.text = defaultText
+	return ( libOS.isAndroid || defaultText ) ? exports.createLabel( defaultText, attributes ) : null
+	}exports.createLabelHTMLorText = createLabelHTMLorText
+
+	function createTextareaAutolink( tag, text, textDefault, attributes )
+	{
+		var tag		   = tag || 'all'
+		var dictionary = (libOS.isAndroid) ? { all: Ti.UI.Android.LINKIFY_ALL, eMail: Ti.UI.Android.LINKIFY_EMAIL_ADDRESSES, address: Ti.UI.Android.LINKIFY_MAP_ADDRESSES, phone: Ti.UI.Android.LINKIFY_PHONE_NUMBERS, URL: Ti.UI.Android.LINKIFY_WEB_URLS                                          }
+										   : { all: Ti.UI.iOS.AUTODETECT_ALL ,                                               address: Ti.UI.iOS.AUTODETECT_ADDRESS       , phone: Ti.UI.iOS.AUTODETECT_PHONE         , URL: Ti.UI.iOS.AUTODETECT_LINK     , calendar: Ti.UI.iOS.AUTODETECT_CALENDAR }
+	    var autoLink         = dictionary[tag] || null
+		var attributes       = libSequence.defaultDictionary( attributes, { editable: false } )
+			attributes.value = (autoLink) ? text : textDefault
+		if (autoLink) attributes.autoLink = autoLink
+	return ( textDefault || autoLink ) ? Ti.UI.createTextArea(attributes) : null
+	}exports.createTextareaAutolink = createTextareaAutolink
+
+	function creatHTMLorAutolinkOrDefault( HTML, textLinkable, textDefault, attributes, attrLabel, attrTextArea ) { return (libOS.isAndroid) ? exports.createLabelHTMLorText( HTML, textDefault, libSequence.defaultDictionary( attrLabel, attributes ) ) : exports.createTextareaAutolink( 'URL', textLinkable, textDefault, libSequence.defaultDictionary( attrTextArea, attributes )  ) }
+	 exports.creatHTMLorAutolinkOrDefault = creatHTMLorAutolinkOrDefault
+
+	function createHyperLink( title, URL, HTML, attributes, attrLabel, attrButton ) { return (libOS.isAndroid) ? createLabelHTMLorText( HTML, title, libSequence.defaultDictionary( attrLabel, attributes ) ) : exports.createButtonLabel( title, function() { if ( libOS.isIOS && Ti.Platform.canOpenURL ) Ti.Platform.openURL(URL) }, libSequence.defaultDictionary( attrButton, attributes ) ) }
+	 exports.createHyperLink = createHyperLink
+
+
+	function createInput( hintText, options, attributes )
+	{
+		var options                 = libSequence.defaultDictionary( options, { clearButton: 'onFocus', autoCapitalization: 'sentence' } )
+		var attributes              = libSequence.defaultDictionary(attributes)
+		var modesClearButtonModes   = { always: Titanium.UI.INPUT_BUTTONMODE_ALWAYS, never: Titanium.UI.INPUT_BUTTONMODE_NEVER, onFocus: Titanium.UI.INPUT_BUTTONMODE_ONFOCUS, onBlur: Titanium.UI.INPUT_BUTTONMODE_ONBLUR }
+		var modesAutoCapitalization = { all: Titanium.UI.TEXT_AUTOCAPITALIZATION_ALL, word: Titanium.UI.TEXT_AUTOCAPITALIZATION_WORDS, sentence: Titanium.UI.TEXT_AUTOCAPITALIZATION_SENTENCES, none: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE }
+		if (options.clearButton)        attributes.clearButtonMode    = modesClearButtonModes  [options.clearButton]
+		if (options.autoCapitalization) attributes.autocapitalization = modesAutoCapitalization[options.autoCapitalization] 
+	return Ti.UI.createTextField(  libSequence.defaultDictionary( attributes, { hintText: hintText, borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED } )  )
+	}exports.createInput = createInput
+
+	function createInputPassword( hintText, options, attributes ) { return exports.createInput(  ( hintText || 'PassWord' ), libSequence.defaultDictionary( options, { autoCapitalization: 'none' } ), libSequence.dictionaryUpdate( attributes, { autocorrect: false, passwordMask: true } )  )  }
+	 exports.createInputPassword = createInputPassword
+
+	function createInputCredentials( hintTexts, attributes, attrUsr, attrPwd )
+	{
+		return { usr: createInput        ( hintTexts.usr, { autoCapitalization: 'none' }, libSequence.defaultDictionary(  libSequence.dictionaryUpdate( attrUsr, { autocorrect: false } ),  attributes  )   ),
+				 pwd: createInputPassword( hintTexts.pwd, { autoCapitalization: 'none' }, libSequence.defaultDictionary(  libSequence.dictionaryUpdate( attrPwd, { autocorrect: false } ),  attributes  )   )  }
+	}exports.createInputCredentials = createInputCredentials
+
+
+	function createViewByLayout(attributes) { return Ti.UI.createView(  libSequence.defaultDictionary( attributes, { width: 'auto', height: 'auto' } )  ) }
+	exports.createViewByLayout = createViewByLayout
+
+	function createViewHorizontal(attributes)
+	{
+		var attributes 	      = libSequence.defaultDictionary(attributes)
+			attributes.layout = 'horizontal'
+Ti.API.info( 'createViewHorizontal ' + attributes)
+	return createViewByLayout(attributes)
+	}exports.createViewHorizontal = createViewHorizontal
+
+	function createViewVertical(attributes)
+	{
+		var attributes 		  = libSequence.defaultDictionary(attributes)
+			attributes.layout = 'vertical'
+Ti.API.info( 'createViewVertical ' + attributes)
+	return createViewByLayout(attributes)
+	}exports.createViewVertical = createViewVertical
+
+	function createViewByList			( list, attributes ) { return libContainer.addListToContainer( 	 Ti.UI.createView		   (attributes), list ) }
+	 exports.createViewByList = createViewByList
+
+	function createViewVerticalByList	( list, attributes ) { return libContainer.addListToContainer( exports.createViewVertical  (attributes), list ) }
+	 exports.createViewVerticalByList = createViewVerticalByList
+
+	function createViewHorizontalByList	( list, attributes ) { return libContainer.addListToContainer( exports.createViewHorizontal(attributes), list ) }
+	 exports.createViewHorizontalByList = createViewHorizontalByList
+
+	function createScrollview(attributes) { return Ti.UI.createScrollView( libSequence.defaultDictionary( attributes, { height: '100%', contentWidth: '100%', contentHeight: 'auto', showVerticalScrollIndicator: true } ) ) }
+	 exports.createScrollview = createScrollview
+
+	function createScrollviewByView ( oView, attributes ) { return libContainer.addListToContainer( exports.createScrollview(attributes), [oView] ) }
+	 exports.createScrollviewByView = createScrollviewByView
+
+
+	function createTableviewrowByList( list, attributes ) { return libContainer.addListToContainer( Ti.UI.createTableViewRow(attributes), list ) }
+	 exports.createTableviewrowByList = createTableviewrowByList
+
+	function createTableviewrowByView( oView, attributes ) { return exports.createTableviewrowByList( [oView], attributes ) }
+	 exports.createTableviewrowByView = createTableviewrowByView
+
+	function createListOfTableviewrowByList(list)
+	{
+		for( var iElement = 0, rows = []; iElement < list.length; iElement++ )
+			rows.push(  exports.createTableviewrowByView( list[iElement] )  )
+	return  rows
+	}exports.createListOfTableviewrowByList = createListOfTableviewrowByList
+
+	function createTableviewsectionByList( title, list, attributes ) { return libContainer.addListToContainer( Ti.UI.createTableViewSection(  libSequence.defaultDictionary( attributes, { headerTitle: title } )  ), exports.createListOfTableviewrowByList(list) )  }
+	exports.createTableviewsectionByList = createTableviewsectionByList
+
+	function listOfTablerowsByDictionaries(dictionaries)
+	{
+		var k = libSequence.keys(dictionaries)
+		for ( var rows = [], iDict = 0, IDict = k.length;  iDict < IDict;  iDict++ )
+		{
+			var dictionary = dictionaries[ k[iDict] ]
+			var header     = dictionary.header || ''
+			var list	   = dictionary.rows   || []
+			for ( var iList = 0, IList = list.length;  iList < IList;  iList++ )
+			{
+				var row = list[iList]
+				if (   ( libVar.isZero(iList) )   &&   (  (header)  ||  ( iDict > 0 )  )   )
+					row.header = row.header || header
+				rows.push(row)
+			}
+		}
+	return rows
+	}exports.listOfTablerowsByDictionaries = listOfTablerowsByDictionaries
+
+
+
+	function createTabNextButton( tabGroup, iTab, attributes )
+	{//Use this AFTER the tab has been created
+		function onClick()
+		{
+			var tabGroup =  tabGroup
+			var setTo    = iTab || tabGroup.getActiveTab()
+			if ( iTab < tabGroup.getTabs.length )
+				setTo++
+			tabGroup.setActiveTab(setTo)
+		}
+	return exports.createButton( onClick, libSequence.defaultDictionary( attributes, { title: 'Next' } ) )
+	}exports.createTabNextButton = createTabNextButton
+
+
+	function createWindowModalWithCloseButton( attrWindow, attrButton ) // don't like this
+	{
+		var win               = libContainer.createWindow(attrWindow) // createWindowModal blows up!
+		    win.leftNavButton = exports.createButtonLabel(  'Close',  function(e){ libContainer.windowClose(win) },  libSequence.defaultDictionary( attrButton, { style: Ti.UI.iPhone.SystemButtonStyle.PLAIN } )  )
+	return  win
+	}exports.createWindowModalWithCloseButton = createWindowModalWithCloseButton
+
+	function createWindowModalWithCloseButtonByView( oView, attrWindow, attrButton ) { return libContainer.addListToContainer(  exports.createWindowModalWithCloseButton( attrWindow, attrButton ), [oView]  ) }
+	 exports.createWindowModalWithCloseButtonByView = createWindowModalWithCloseButtonByView
+
+	function createWindowSemimodalByView( oView, attrWindow, attrOverlay, attrContainer )
+	{// inspired in https://github.com/appcelerator-developer-relations/Forging-Titanium/blob/master/ep-010/Forms/Resources/semiModalPicker.js
+		var overlay		= exports.createViewVertical(  libSequence.defaultDictionary( attrOverlay, { backgroundColor: '#000', opacity: 0.6 } )  )
+		var container	= exports.createViewVertical(  libSequence.defaultDictionary( attrContainer, { bottom: 0 } )  )
+		var win			= libContainer.createWindow(  libSequence.defaultDictionary(attrWindow), { backgroundColor: 'transparent', bottom: 0 } )
+		if (libOS.isIOS) // we add the toolbar for iPhone
+			container.add(  exports.iOS_createCancelAndDoneToolbar( id, undefined, function(){ win.close() } )  )
+		container.add(oView)
+	return libContainer.addListToContainer( win, [ overlay, container ] )
+	}exports.createWindowSemimodalByView = createWindowSemimodalByView
+
+	function createWindowModalSmart( oView, isModal, attrOpen, attributes ) { return ( isModal || false ) ? exports.createWindowModalWithCloseButtonByView( oView, attributes ) : exports.createWindowSemimodalByView( oView, attributes ) }
+	exports.createWindowModalSmart = createWindowModalSmart
+
+	function createWindowModalSmartAndOpen( oView, isModal, attrOpen, attributes ) { return libContainer.containerOpen( createWindowModalSmart( oView, isModal, attrOpen, attributes ), attrOpen ) }
+	 exports.createWindowModalSmartAndOpen = createWindowModalSmartAndOpen
+
+
+
+	function OS_createWindowButton( title, oView, isModal, attrOpen, attrWindow, attributes, choices )
+	{// Useful for the picker in iOS
+		var oButton  = undefined
+		var	 title	 = title || 'Open'
+		var  choices = libSequence.defaultDictionary( choices, { android: false, iphone: true, ipad: true } )
+		if ( choices[Ti.Platform.osname] )
+		{
+			var oButton = Ti.UI.createButton(  libSequence.defaultDictionary( attributes, { title: title } )  )
+				oButton.addEventListener( 'click', 
+					function(e)
+					{ 
+						exports.createAndOpenWindowModal( oView, isModal, attrOpen, attrWindow )
+					} )
+		}
+	if (oButton) return oButton
+/* else */		 return oView
+	}exports.OS_createWindowButton = OS_createWindowButton
+
+
+	function createPickerColumnByList( list, attributes )
+	{
+		var oPickerColumn = Ti.UI.createPickerColumn( libSequence.defaultDictionary(attributes) )
+		for ( var iPickerRow = 0, IPickerRow = list.length;  iPickerRow < IPickerRow;  iPickerRow++ )
+			oPickerColumn.addRow( list[iPickerRow] )
+	return  oPickerColumn
+	}exports.createPickerColumnByList = createPickerColumnByList
+
+	function createListOfPickerrowsByList( list, attributes )
+	{// We need a dictionary instead of a list, since we want to use the key as the value
+		var list = list || []
+		var rows = []
+		for ( var iItem = 0; iItem < list.length; iItem++ )
+		{
+			var oPickerRow = Ti.UI.createPickerRow( libSequence.defaultDictionary(attributes) )
+				oPickerRow.setTitle( list[iItem] )
+			rows.push(oPickerRow)
+		}
+	return rows
+	}exports.createListOfPickerrowsByList = createListOfPickerrowsByList
+
+	function createPickerByList( id, data, listOfAttributes )
+	{
+		var data             = data             || []
+		var listOfAttributes = listOfAttributes || [ { className: 'picker' }, { className: 'pickerColumn' }, { className: 'pickerRow' } ]
+		var attrPickerColumn = exports.addSelectorsToAttributes( listOfAttributes[1].className, id, listOfAttributes[1].attributes )
+		var attrPickerRow    = exports.addSelectorsToAttributes( listOfAttributes[2].className, id, listOfAttributes[2].attributes )
+		var attrPicker       = exports.addSelectorsToAttributes( listOfAttributes[0].className, id, listOfAttributes[0].attributes )
+			attrPicker.type  = attrPicker.type || Ti.UI.PICKER_TYPE_PLAIN
+		if (  libOS.isAndroid  &&  ( data.length > 1 )  )  attrPicker.useSpinner         = true
+		if   (libOS.isIOS)									attrPicker.selectionIndicator = true
+Ti.API.info(data.length)
+		var columns = []
+		for ( var iColumn = 0, IColumn = data.length;  iColumn < IColumn;  iColumn++ )
+		{// We go through each item in the list (Array)
+			var rows = exports.createListOfPickerrowsByList( data[iColumn], attrPickerRow )
+			if ( data.length > 1 )  columns.push(  createPickerColumnByList( rows, attrPickerColumn )  )
+			else					columns = rows
+		}
+	return libContainer.addListToContainer( Ti.UI.createPicker(attrPicker), [columns] )
+	}exports.createPickerByList = createPickerByList
+
+
+	function createTablePullHeader( texts, attrImg, attrLabelStatus, attrLabelLastUD, attrIndicator )
+	{// TODO use proper drawing!
+		var  texts           = libSequence.defaultDictionary(texts)
+		var  textStatus      = texts.status || 'Pull to reload'
+		var  textLastUD      = texts.lastUD || 'Last Updated'
+		var oImg             = Ti.UI.createView (   libSequence.defaultDictionary(  attrImg, { backgroundImage: '/src/cfg/img/pull.png', width: 23, height: 60, bottom: 10, left: 20 } )   )
+		var oLabelStatus     = Ti.UI.createLabel(   libSequence.defaultDictionary(  attrLabelStatus, { text: textStatus,                            left: 55, width: 200, bottom: 30, height: 'auto', color: '#576c89', textAlign: 'center', font: { fontSize: 13, fontWeight: 'bold' }, shadowColor: '#999', shadowOffset: { x: 0, y: 1 } } )   )
+		var oLabelLastUD     = Ti.UI.createLabel(   libSequence.defaultDictionary(  attrLabelLastUD, { text: textLastUD + ': ' + libDate.formatDate(), left: 55, width: 200, bottom: 15, height: 'auto', color: '#576c89', textAlign: 'center', font: { fontSize: 12 }                    , shadowColor: '#999', shadowOffset: { x: 0, y: 1 } } )   )
+		var oIndicator       = Ti.UI.createActivityIndicator( libSequence.defaultDictionary( attrIndicator, { left: 20, bottom: 13, width: 30, height: 30 }  )  )
+	return { height: 60, view: libContainer.addListToContainer(  Ti.UI.createView( { backgroundColor: '#e2e7ed', width: 320, height: 60 } ),  [ oImg, oLabelStatus, oLabelLastUD, oIndicator ]  ), img: oImg, status: oLabelStatus, lastUpdated: oLabelLastUD, indicator: oIndicator }
+	}exports.createTablePullHeader = createTablePullHeader
+
+	function createTable( attributes, fn, fnArgs, timeout, tablePullLabels, oTablePullHeader )
+	{
+		var attributes = libSequence.defaultDictionary( attributes, { pulling: false, reloading: false })
+		if ( libOS.isIOS && attributes.grouped )
+		{
+			attributes.style = Ti.UI.iPhone.TableViewStyle.GROUPED
+		}
+			attributes.style = (libOS.isIOS) ? attributes.style : null
+		var fn               = fn     || null
+		var fnArgs           = fnArgs || []
+		var oTable           = Ti.UI.createTableView(attributes)
+			oTable.addEventListener( 'click', 
+				function(e) 
+				{ 
+					rowFn = e.rowData.fn || attributes.onClick
+					libVar.callIfFunction( rowFn, e )
+				} )
+
+		if ( libVar.isFunction(fn) )
+		{
+			function execFn() { fn.apply( this, fnArgs ) }
+
+			if (libOS.isIOS)
+			{// from KitchenSink 2.0 
+				var tablePullLabels = libSequence.defaultDictionary( tablePullLabels, { lastUpdated: 'Last UpDated', refreshPull: 'Pull down to refresh...', refreshRelease: 'Release to refresh...', reloading: 'Reloading...' } )
+				var timeout			= 2000
+				var IOffset         =  -65
+				var duration		=  180
+				var tableHeaderPull = oTablePullHeader || exports.createTablePullHeader( { status: tablePullLabels.status, lastUD: tablePullLabels.lastUpdated } )
+				  oTable.headerPullView = tableHeaderPull.view
+	
+				function reload()
+				{
+					execFn()
+					oTable.setContentInsets( { top: 0}, { animated: true } )
+					oTable.reloading = false
+					tableHeaderPull.lastUpdated.text = tablePullLabels.lastUpdated + ': ' + libDate.formatDate()
+					tableHeaderPull.status.text      = tablePullLabels.refreshPull
+					tableHeaderPull.indicator.hide()
+					tableHeaderPull.img.show()
+				}
+
+
+				oTable.addEventListener( 'scroll',
+					function(e)
+					{
+						var offset = e.contentOffset.y
+						if (  ( offset <= IOffset )  &&  !oTable.pulling  )
+						{
+							var t = Ti.UI.create2DMatrix()
+								t              = t.rotate(-180)
+								oTable.pulling = true
+								tableHeaderPull.img.animate( { transform: t, duration: duration } )
+								tableHeaderPull.status.text = tablePullLabels.refreshRelease
+						}
+						else if (  oTable.pulling  &&  ( offset > IOffset )  &&  ( offset < 0 )  )
+						{
+							var t = Ti.UI.create2DMatrix()
+								oTable.pulling = false
+								tableHeaderPull.img.animate( { transform: t , duration: duration } )
+								tableHeaderPull.status.text = tablePullLabels.refreshPull
+						}
+					} )
+				
+				oTable.addEventListener( 'scrollEnd',
+					function(e)
+					{
+						if (  oTable.pulling  &&  !oTable.reloading  &&  ( e.contentOffset.y <= IOffset )  )
+						{
+							oTable.reloading = true
+							oTable.pulling   = false
+							tableHeaderPull.img.hide()
+							tableHeaderPull.indicator.show()
+							tableHeaderPull.status.text = tablePullLabels.reloading
+							oTable.setContentInsets( { top: tableHeaderPull.height }, { animated: true } )
+							tableHeaderPull.img.transform = Ti.UI.create2DMatrix()
+							setTimeout( reload, timeout )
+						}
+					} )
+//Ti.Gesture.addEventListener( 'shake', fn )
+			}
+		}
+	return oTable
+	}exports.createTable = createTable
+
+
+	function createFacebookButton( appID, fnLogIn, fnLogOut, permissions, attributes )
+	{// TODO centralized appID?
+		var attributes  = libSequence.defaultDictionary(attributes)
+		if (attributes.isWide) attributes.style = (libOS.isIOS) ? Ti.Facebook.BUTTON_STYLE_WIDE : 'wide'
+Ti.Facebook.appid           = appID                    || '134793934930'
+Ti.Facebook.permissions     = permissions              || [ 'publish_stream', 'read_stream' ]
+Ti.Facebook.forceDialogAuth = (attributes.forceDialog) || true
+		var oFB = Ti.Facebook.createLoginButton(attributes)
+		if ( libVar.isFunction(fnLogIn ) ) Ti.Facebook.addEventListener( 'login' , fnLogIn  )
+		if ( libVar.isFunction(fnLogOut) ) Ti.Facebook.addEventListener( 'logout', fnLogOut )
+	return  oFB
+	}exports.createFacebookButton = createFacebookButton
+
+	function createWindowByView( oView, attributes ) { return libContainer.addListToContainer(  libContainer.createWindow(attributes), [oView] )  }
+	 exports.createWindowByView = createWindowByView
+
+	function createWindowAndTabByView( oView, attrWindow, attrTab ) 
+	{ 
+		var containers = libContainer.createWindowAndTab( attrWindow, attrTab )
+			containers.win.add(oView)
+			containers.view = oView
+	return  containers
+	}exports.createWindowAndTabByView = createWindowAndTabByView
+
+	function createWindowAndTabAndTabgroupByView( oView, attrWindow, attrTab, attrTabgroup )
+	{
+		var containers = libContainer.createWindowAndTabAndTabgroup( attrWindow, attrTab, attrTabgroup )
+			containers.win.add(oView)
+			containers.view = oView
+	return  containers
+	}exports.createWindowAndTabAndTabgroupByView = createWindowAndTabAndTabgroupByView
