@@ -1,4 +1,4 @@
-var exports = exports || {}
+var exports = exports || {};
 
 function parseISO8601Date(s){
  
@@ -54,4 +54,4 @@ function parseISO8601Date(s){
   }
  
   return new Date(ms);
-}exports.parseISO8601Date = parseISO8601Date
+}exports.parseISO8601Date = parseISO8601Date;

@@ -1,34 +1,34 @@
 // require('src/include/require_once').monkeypatch(this) // XXX ?
 var exports = exports || {};
 
-	var PATH  = 'src/code/towel/';
+    var PATH  = 'src/code/towel/';
 
-	var Path = exports.Path = {
-			TT   : PATH,
-			Third: PATH + 'inc/'};
-	
+    var Path = exports.Path = {
+            TT   : PATH,
+            Third: 'src/code/'};
 
-	var Module = { // just in case we decide to move the files from place
-		// basic
-			Lorem        : PATH + 'lorem',
-			Color        : PATH + 'color',
-			UID          : PATH + 'uid',
-			Font         : PATH + 'font',
-			Log          : PATH + 'log',
-			Import       : PATH + 'import',
-			Native       : PATH + 'native',
-			Cast         : PATH + 'cast',
-		// build
-			Titanium     : PATH + 'titanium',
-			Build        : PATH + 'build',
-			OS           : PATH + 'os', // detect Operating system
-			Application  : PATH + 'application',
-		// variables
-			Compare      : PATH + 'compare',
-			Validate     : PATH + 'validate',
-			Math_        : PATH + 'math',
-		// structures
-			Suscriptible : PATH + 'suscriptible',
+
+    var Module = { // just in case we decide to move the files from place
+        // basic
+            Lorem        : PATH + 'lorem',
+            Color        : PATH + 'color',
+            UID          : PATH + 'uid',
+            Font         : PATH + 'font',
+            Log          : PATH + 'log',
+            Import       : PATH + 'import',
+            Native       : PATH + 'native',
+            Cast         : PATH + 'cast',
+        // build
+            Titanium     : PATH + 'titanium',
+            Build        : PATH + 'build',
+            OS           : PATH + 'os', // detect Operating system
+            Application  : PATH + 'application',
+        // variables
+            Compare      : PATH + 'compare',
+            Validate     : PATH + 'validate',
+            Math_        : PATH + 'math',
+        // structures
+            Suscriptible : PATH + 'suscriptible',
 			Sort         : PATH + 'sort',
 			Sequence     : PATH + 'sequence', 
 			Dictionary   : PATH + 'dictionary',
@@ -85,10 +85,10 @@ var exports = exports || {};
 
 var logger = require(exports.Module.Log);
 
-	function require_(x) 
-	{
+    function require_(x) 
+    {
 logger.debug( 'requiring', x, true );
 return require(x);
-	}exports.require = require_;
+    }exports.require = require_;
 
 logger.info( 'Titanium Towel modules', exports.Module);
