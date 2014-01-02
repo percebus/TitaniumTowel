@@ -1,12 +1,12 @@
-var exports = exports || {}
+var exports = exports || {};
 
-	var PATH = 'src/'
+	var PATH = 'src/';
 
 	var Module = exports.Module = {
 			Env       : PATH + 'env',
 			Mock      : PATH + 'mock',
-			Lib       : PATH + 'code/lib',
-			Import    : PATH + 'code/lib/import',
+			Lib       : PATH + 'code/towel',
+			Import    : PATH + 'code/towel/import',
 			Config    : PATH + 'cfg/default',
 			Img       : PATH + 'cfg/img',
 			UI        : PATH + 'ui',
@@ -14,4 +14,4 @@ var exports = exports || {}
 			Business  : PATH + 'business',
 			Tech      : PATH + 'tech',
 			Controller: PATH + 'controller',
-			Test      : PATH + 'test'}
+			Test      : PATH + 'test' };
