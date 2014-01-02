@@ -3,71 +3,71 @@ Ti.include('/src/code/towel/test/include.js');
 	sequence = require('src/code/towel/sequence');
 
 
-	function Test_sequence()
-	{
-		function setUp()
-		{
-			list = [1, 2, 3]
-		}
+    function Test_sequence()
+    {
+        function setUp()
+        {
+            list = [1, 2, 3];
+        }
 
-		function test_updateAtIndex() { assertEqual( sequence.updateAtIndex( [1, 2, 3], 1, function(x) { return x*2 } ),  4 ) }
-		function test_reverse_list     () { assertEqual( sequence.reverse([1, 2, 3]), [3, 2, 1] ) }
-		function test_reverse_arguments() { assertEqual( sequence.reverse( 1, 2, 3 ), [3, 2, 1] ) }
-		function test_sort          () { assertEqual( sequence.sort( [4, 2, 1, 3, 5, 0, 6] ), [0, 1, 2, 3, 4, 5, 6] ) }
-		function test_sort_objs     () { assertEqual( sequence.sort( [ {'id':4}, {'id':2}, {'id':3}, {'id': 1} ], function( a, b ) { return parseInt(a.id)-parseInt(b.id) } ), [ {'id': 1}, {'id':2}, {'id':3}, {'id':4} ] ) }
-		function test_sort_objs_desc() { assertEqual( sequence.sort( [ {'id':4}, {'id':2}, {'id':3}, {'id': 1} ], function( a, b ) { return parseInt(b.id)-parseInt(a.id) } ), [ {'id': 4}, {'id':3}, {'id':2}, {'id':1} ] ) }
-	}Test.UT.runAndCache( Test_sequence, 'sequence' )
+        function test_updateAtIndex() { assertEqual( sequence.updateAtIndex( [1, 2, 3], 1, function(x) { return x*2 } ),  4 ); }
+        function test_reverse_list     () { assertEqual( sequence.reverse([1, 2, 3]), [3, 2, 1] ); }
+        function test_reverse_arguments() { assertEqual( sequence.reverse( 1, 2, 3 ), [3, 2, 1] ); }
+        function test_sort          () { assertEqual( sequence.sort( [4, 2, 1, 3, 5, 0, 6] ), [0, 1, 2, 3, 4, 5, 6] ); }
+        function test_sort_objs     () { assertEqual( sequence.sort( [ {'id':4}, {'id':2}, {'id':3}, {'id': 1} ], function( a, b ) { return parseInt(a.id)-parseInt(b.id); } ), [ {'id': 1}, {'id':2}, {'id':3}, {'id':4} ] ); }
+        function test_sort_objs_desc() { assertEqual( sequence.sort( [ {'id':4}, {'id':2}, {'id':3}, {'id': 1} ], function( a, b ) { return parseInt(b.id)-parseInt(a.id); } ), [ {'id': 4}, {'id':3}, {'id':2}, {'id':1} ] ); }
+    }Test.UT.runAndCache(Test_sequence, 'sequence');
 
 
-	function Test_sequence_indexes()
-	{
-		function setUp()
-		{
-			list = [1, 2, 3, '2', 3, 4]
-		}
+    function Test_sequence_indexes()
+    {
+        function setUp()
+        {
+            list = [1, 2, 3, '2', 3, 4];
+        }
 
-		function test_empty_indexFirst() { assertIdentical( sequence.indexFirst([]), null ) }
-		function test_empty_indexLast () { assertIdentical( sequence.indexLast ([]), null ) }
-		function test_1_indexFirst    () { assertIdentical( sequence.indexFirst(['a']), 0 ) }
-		function test_1_indexLast     () { assertIdentical( sequence.indexLast (['a']), 0 ) }
-		function test_2_indexFirst    () { assertIdentical( sequence.indexFirst(['a', 'b']), 0 ) }
-		function test_2_indexLast     () { assertIdentical( sequence.indexLast (['a', 'b']), 1 ) }
+        function test_empty_indexFirst() { assertIdentical( sequence.indexFirst([]), null ); }
+        function test_empty_indexLast () { assertIdentical( sequence.indexLast ([]), null ); }
+        function test_1_indexFirst    () { assertIdentical( sequence.indexFirst(['a']), 0 ); }
+        function test_1_indexLast     () { assertIdentical( sequence.indexLast (['a']), 0 ); }
+        function test_2_indexFirst    () { assertIdentical( sequence.indexFirst(['a', 'b']), 0 ); }
+        function test_2_indexLast     () { assertIdentical( sequence.indexLast (['a', 'b']), 1 ); }
 
-		function test_indexFirst(){ assertIdentical( sequence.indexFirst(list), 0 ) }
-		function test_indexLast (){ assertIdentical( sequence.indexLast (list), 5 ) }
+        function test_indexFirst(){ assertIdentical( sequence.indexFirst(list), 0 ); }
+        function test_indexLast (){ assertIdentical( sequence.indexLast (list), 5 ); }
 
-		function test_indexes_exact_1    (){ assertEqual( sequence.indexes( list,  1  ), [0] ) }
-		function test_indexes_exact_2_int(){ assertEqual( sequence.indexes( list,  2  ), [1] ) }
-		function test_indexes_exact_3    (){ assertEqual( sequence.indexes( list,  3  ), [2, 4] ) }
-		function test_indexes_exact_2_str(){ assertEqual( sequence.indexes( list, '2' ), [3] ) }
-		function test_indexes_exact_4    (){ assertEqual( sequence.indexes( list,  4  ), [5] ) }
-		function test_indexes_exact_foo  (){ assertEqual( sequence.indexes( list, 'a' ), [] ) }
+        function test_indexes_exact_1    (){ assertEqual( sequence.indexes( list,  1  ), [0] ); }
+        function test_indexes_exact_2_int(){ assertEqual( sequence.indexes( list,  2  ), [1] ); }
+        function test_indexes_exact_3    (){ assertEqual( sequence.indexes( list,  3  ), [2, 4] ); }
+        function test_indexes_exact_2_str(){ assertEqual( sequence.indexes( list, '2' ), [3] ); }
+        function test_indexes_exact_4    (){ assertEqual( sequence.indexes( list,  4  ), [5] ); }
+        function test_indexes_exact_foo  (){ assertEqual( sequence.indexes( list, 'a' ), [] ); }
 
-		function test_indexes_fn(){ assertEqual( sequence.indexes( list, function(x){ return x == 2 }), [1, 3] ) }
+        function test_indexes_fn(){ assertEqual( sequence.indexes( list, function(x){ return x == 2; }), [1, 3] ); }
 
-		function test_indexMatchFirst_exact_1    (){ assertIdentical( sequence.indexMatchFirst( list,  1  ), 0 ) }
-		function test_indexMatchFirst_exact_2_int(){ assertIdentical( sequence.indexMatchFirst( list,  2  ), 1 ) }
-		function test_indexMatchFirst_exact_3    (){ assertIdentical( sequence.indexMatchFirst( list,  3  ), 2 ) }
-		function test_indexMatchFirst_exact_2_str(){ assertIdentical( sequence.indexMatchFirst( list, '2' ), 3 ) }
-		function test_indexMatchFirst_exact_4    (){ assertIdentical( sequence.indexMatchFirst( list,  4  ), 5 ) }
-		function test_indexMatchFirst_exact_foo  (){ assertIdentical( sequence.indexMatchFirst( list, 'a' ), null ) }
+        function test_indexMatchFirst_exact_1    (){ assertIdentical( sequence.indexMatchFirst( list,  1  ), 0 ); }
+        function test_indexMatchFirst_exact_2_int(){ assertIdentical( sequence.indexMatchFirst( list,  2  ), 1 ); }
+        function test_indexMatchFirst_exact_3    (){ assertIdentical( sequence.indexMatchFirst( list,  3  ), 2 ); }
+        function test_indexMatchFirst_exact_2_str(){ assertIdentical( sequence.indexMatchFirst( list, '2' ), 3 ); }
+        function test_indexMatchFirst_exact_4    (){ assertIdentical( sequence.indexMatchFirst( list,  4  ), 5 ); }
+        function test_indexMatchFirst_exact_foo  (){ assertIdentical( sequence.indexMatchFirst( list, 'a' ), null ); }
 
-		function test_indexMatchLast_exact_1    (){ assertIdentical( sequence.indexMatchLast( list,  1  ), 0 ) }
-		function test_indexMatchLast_exact_2_int(){ assertIdentical( sequence.indexMatchLast( list,  2  ), 1 ) }
-		function test_indexMatchLast_exact_3    (){ assertIdentical( sequence.indexMatchLast( list,  3  ), 4 ) }
-		function test_indexMatchLast_exact_2_str(){ assertIdentical( sequence.indexMatchLast( list, '2' ), 3 ) }
-		function test_indexMatchLast_exact_4    (){ assertIdentical( sequence.indexMatchLast( list,  4  ), 5 ) }
-		function test_indexMatchLast_exact_foo  (){ assertIdentical( sequence.indexMatchLast( list, 'a' ), null ) }
+        function test_indexMatchLast_exact_1    (){ assertIdentical( sequence.indexMatchLast( list,  1  ), 0 ); }
+        function test_indexMatchLast_exact_2_int(){ assertIdentical( sequence.indexMatchLast( list,  2  ), 1 ); }
+        function test_indexMatchLast_exact_3    (){ assertIdentical( sequence.indexMatchLast( list,  3  ), 4 ); }
+        function test_indexMatchLast_exact_2_str(){ assertIdentical( sequence.indexMatchLast( list, '2' ), 3 ); }
+        function test_indexMatchLast_exact_4    (){ assertIdentical( sequence.indexMatchLast( list,  4  ), 5 ); }
+        function test_indexMatchLast_exact_foo  (){ assertIdentical( sequence.indexMatchLast( list, 'a' ), null ); }
 
-		function test_isFirst_1  () { assertTrue ( sequence.isFirst(list,  1 ) ) }
-		function test_isFirst_2  () { assertFalse( sequence.isFirst(list,  2 ) ) }
-		function test_isFirst_3  () { assertFalse( sequence.isFirst(list,  3 ) ) }
-		function test_isFirst_4  () { assertFalse( sequence.isFirst(list,  4 ) ) }
+        function test_isFirst_1  () { assertTrue ( sequence.isFirst(list,  1 ) ); }
+        function test_isFirst_2  () { assertFalse( sequence.isFirst(list,  2 ) ); }
+        function test_isFirst_3  () { assertFalse( sequence.isFirst(list,  3 ) ); }
+        function test_isFirst_4  () { assertFalse( sequence.isFirst(list,  4 ) ); }
 
-		function test_isLast_1  () { assertFalse( sequence.isLast(list,  1 ) ) }
-		function test_isLast_2  () { assertFalse( sequence.isLast(list,  2 ) ) }
-		function test_isLast_3  () { assertFalse( sequence.isLast(list,  3 ) ) }
-		function test_isLast_4  () { assertTrue ( sequence.isLast(list,  4 ) ) }
+        function test_isLast_1  () { assertFalse( sequence.isLast(list,  1 ) ); }
+        function test_isLast_2  () { assertFalse( sequence.isLast(list,  2 ) ); }
+        function test_isLast_3  () { assertFalse( sequence.isLast(list,  3 ) ); }
+        function test_isLast_4  () { assertTrue ( sequence.isLast(list,  4 ) ); }
 	}Test.UT.runAndCache( Test_sequence_indexes, 'sequence indexes' )
 
 
