@@ -1,35 +1,35 @@
-Ti.include('/src/code/towel/include.js')
-var cast = TT.require(TT.Module.Cast)
-var SDK  = TT.require(TT.Module.Titanium)
+Ti.include('/src/code/towel/include.js');
+var cast = TT.require(TT.Module.Cast);
+var SDK  = TT.require(TT.Module.Titanium);
 
-exports.is = exports.isSameExact = exports.areExactSame = builtin.is
-exports.isIdentical  = exports.areIdentical  = builtin.isIdentical
-exports.isEquivalent = exports.areEquivalent = builtin.isEquivalent
-exports.hasProperty = exports.hasattr = exports.has = builtin.hasProperty
-exports.hasKeys = builtin.hasKeys
-exports.hasKey = builtin.hasKey
-exports.propertyIsEnumerable = builtin.propertyIsEnumerable
-exports.hasEnumerables = exports.hasAnyEnumerable = builtin.hasEnumerables
-exports.hasEnumerable = exports.isEnumerable = builtin.hasEnumerable
-exports.hasTrait = exports.hasInheritedProperty = builtin.hasTrait
-exports.hasTraits = hasInheritedProperties = builtin.hasTraits
-exports.item_get = exports.item = exports.getItem = builtin.item_get
-exports.item_set = exports.setItem = builtin.item_set
-exports.fwd = builtin.fwd
-exports.isExtensible = builtin.isExtensible
-exports.isSealed     = builtin.isSealed
-exports.isFrozen     = builtin.isFrozen
+exports.is = exports.isSameExact = exports.areExactSame = builtin.is;
+exports.isIdentical  = exports.areIdentical  = builtin.isIdentical;
+exports.isEquivalent = exports.areEquivalent = builtin.isEquivalent;
+exports.hasProperty = exports.hasattr = exports.has = builtin.hasProperty;
+exports.hasKeys = builtin.hasKeys;
+exports.hasKey = builtin.hasKey;
+exports.propertyIsEnumerable = builtin.propertyIsEnumerable;
+exports.hasEnumerables = exports.hasAnyEnumerable = builtin.hasEnumerables;
+exports.hasEnumerable = exports.isEnumerable = builtin.hasEnumerable;
+exports.hasTrait = exports.hasInheritedProperty = builtin.hasTrait;
+exports.hasTraits = exports.hasInheritedProperties = builtin.hasTraits;
+exports.item_get = exports.item = exports.getItem = builtin.item_get;
+exports.item_set = exports.setItem = builtin.item_set;
+exports.fwd = builtin.fwd;
+exports.isExtensible = builtin.isExtensible;
+exports.isSealed     = builtin.isSealed;
+exports.isFrozen     = builtin.isFrozen;
 
-exports.boolCast = exports.bool = cast.bool
-exports.numberCast = exports.toNumber = cast.number
-exports.f = exports.identity = cast.f
-exports.itsTrue = cast.itsTrue
-exports.itsFalse = exports.falsify = cast.itsFalse
-exports.itsNull = cast.itsNull
-exports.now = cast.now
-exports.pass = cast.pass
-exports.fail = cast.fail
-exports.passOrNothing = cast.passOrNothing
+exports.boolCast = exports.bool = cast.bool;
+exports.numberCast = exports.toNumber = cast.number;
+exports.f = exports.identity = cast.f;
+exports.itsTrue = cast.itsTrue;
+exports.itsFalse = exports.falsify = cast.itsFalse;
+exports.itsNull = cast.itsNull;
+exports.now = cast.now;
+exports.pass = cast.pass;
+exports.fail = cast.fail;
+exports.passOrNothing = cast.passOrNothing;
 
 	var C = exports.C = {
 		True : new Boolean(true),
