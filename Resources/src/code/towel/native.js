@@ -8,7 +8,7 @@ var exports = exports || {};
     function isEquivalent(x, y) { return x == y; }
      exports.isEquivalent = exports.areEquivalent = isEquivalent;
 
-    function isIdentical (x, y) { return x === y; }
+    function isIdentical(x, y) { return x === y; }
      exports.isIdentical = exports.areIdentical = isIdentical;
 
     function typeOf(x) { return typeof(x); } 
@@ -37,11 +37,11 @@ var exports = exports || {};
     exports.isArray = Array.isArray;
     exports.Boolean = Boolean;
     exports.isFinite = isFinite;
-    exports.isNaN	 = isNaN;
+    exports.isNaN    = isNaN;
     exports.Function = Function;
     exports.call     = Function.prototype.call;
     exports.apply    = Function.prototype.apply;
-    exports.bind	 = Function.prototype.bind;
+    exports.bind     = Function.prototype.bind;
     exports.undefined = undefined;
     exports.Date      = Date;
     exports.UTC       = Date.UTC;
@@ -49,7 +49,7 @@ var exports = exports || {};
     exports.parseInt   = parseInt;
     exports.parseFloat = parseFloat;
     exports.JSON         = JSON;
-    exports.parseJSON    = JSON.parse;
+    exports.parseJSON    = JSON.parse; // XXX exports.parse should handle it
     exports.toJSONstring = exports.toJsonString = exports.stringifyJSON = JSON.stringify;
     exports.clearInterval = clearInterval;
     exports.setInterval   =   setInterval;
@@ -71,12 +71,6 @@ var exports = exports || {};
     exports.toExponential     = Number.toExponential;
     exports.toFixed           = Number.toFixed;
     exports.toPrecision       = Number.toPrecision;
-    exports.escape              = escape;
-    exports.unescape            = unescape;
-    exports.encodeURI           = encodeURI;
-    exports.encodeURIComponent  = encodeURIComponent;
-    exports.decodeURI           = decodeURI;
-    exports.decodeURIComponent  = decodeURIComponent;
     exports.prototype_               = Object.prototype; // if we assign the exports require dictionary's prototype... dear G0d why!?
     exports.isPrototypeOf            = Object.isPrototypeOf;
     exports.getPrototypeOf           = Object.getPrototypeOf; 
@@ -88,6 +82,15 @@ var exports = exports || {};
     exports.isExtensible             = Object.isExtensible;
     exports.isSealed                 = Object.isSealed;
     exports.isFrozen                 = Object.isFrozen;
+
+// TODO Are these Titanium specific?
+    exports.escape              = escape;
+    exports.unescape            = unescape;
+    exports.encodeURI           = encodeURI;
+    exports.encodeURIComponent  = encodeURIComponent;
+    exports.decodeURI           = decodeURI;
+    exports.decodeURIComponent  = decodeURIComponent;
+
 
     function fwd(fn, args, context) { return (args || context) ? exports.apply.call(fn, context, args) : fn(); }
      exports.fwd = fwd;
@@ -123,22 +126,22 @@ var exports = exports || {};
     exports.String_slice       = String.prototype.slice       ? function(x, i, I) { return String.prototype.slice.call      (x, i, I); } : null;
 
 
-    exports.splice = Array.prototype.splice ? function(x, i, n, items) 
-    { 
+    exports.splice = Array.prototype.splice ? function(x, i, n, items)
+    {
         var array = Array.prototype.splice.call(x, i, n); // 1st remove
     return items ? exports.unshift(array, items) : array; // then add
     } : null;
 
-    exports.charAt             = String.prototype.charAt      ? function(x, item) { return String.prototype.charAt.call     (x, item); } : null;
-    exports.charCodeAt         = String.prototype.charCodeAt  ? function(x, item) { return String.prototype.charCodeAt.call (x, item); } : null;
-    exports.toLowerCase        = String.prototype.toLowerCase ? function(x      ) { return String.prototype.toLowerCase.call(x      ); } : null;
-    exports.toUpperCase        = String.prototype.toUpperCase ? function(x      ) { return String.prototype.toUpperCase.call(x      ); } : null;
-    exports.replace            = String.prototype.replace     ? function(x, s, S) { return String.prototype.replace.call    (x, s, S); } : null;
-    exports.substr             = String.prototype.substr      ? function(x, i, L) { return String.prototype.substr.call     (x, i, L); } : null;
-    exports.substring          = String.prototype.substring   ? function(x, a, b) { return String.prototype.substring.call  (x, a, b); } : null;
-    exports.search             = String.prototype.search      ? function(x, item) { return String.prototype.search.call     (x, item); } : null;
-    exports.split              = String.prototype.split       ? function(x, s, l) { return String.prototype.split.call      (x, s, l); } : null;
-    exports.match              = String.prototype.match       ? function(x, item) { return String.prototype.match.call      (x, item); } : null;
+    exports.charAt      = String.prototype.charAt      ? function(x, item) { return String.prototype.charAt.call     (x, item); } : null;
+    exports.charCodeAt  = String.prototype.charCodeAt  ? function(x, item) { return String.prototype.charCodeAt.call (x, item); } : null;
+    exports.toLowerCase = String.prototype.toLowerCase ? function(x      ) { return String.prototype.toLowerCase.call(x      ); } : null;
+    exports.toUpperCase = String.prototype.toUpperCase ? function(x      ) { return String.prototype.toUpperCase.call(x      ); } : null;
+    exports.replace     = String.prototype.replace     ? function(x, s, S) { return String.prototype.replace.call    (x, s, S); } : null;
+    exports.substr      = String.prototype.substr      ? function(x, i, L) { return String.prototype.substr.call     (x, i, L); } : null;
+    exports.substring   = String.prototype.substring   ? function(x, a, b) { return String.prototype.substring.call  (x, a, b); } : null;
+    exports.search      = String.prototype.search      ? function(x, item) { return String.prototype.search.call     (x, item); } : null;
+    exports.split       = String.prototype.split       ? function(x, s, l) { return String.prototype.split.call      (x, s, l); } : null;
+    exports.match       = String.prototype.match       ? function(x, item) { return String.prototype.match.call      (x, item); } : null;
 
     exports.toString       = Object.prototype.toString       ? function(x      ) { return Object.prototype.toString.call      (x      ); } : null;
     exports.hasOwnProperty = Object.prototype.hasOwnProperty ? function(x, item) { return Object.prototype.hasOwnProperty.call(x, item); } : null;
@@ -148,7 +151,7 @@ var exports = exports || {};
     { // this is such a native function that every instance shares, that is easier to ask for forgiveness
         try
         {
-        if ( exports.hasOwnProperty(x, property) )
+            if ( exports.hasOwnProperty(x, property) )
             {
     return true;
             }
@@ -163,13 +166,36 @@ var exports = exports || {};
 
     function hasEnumerables(x)
     {
-        for (var property in x)
+        for (var property in x) // TODO? (let property in x)
         {// we just need 1
     return true;
         }
     return false;
     }exports.hasEnumerables = exports.hasAnyEnumerable = hasEnumerables;
 
+
+    function enumerate(x)
+    {// we don't call them 'properties' as getOwnPropertyNames include some not enumerable
+        var results = [];
+        for (var property in x) // TODO? (let property in x)
+            results[results.length] = property;
+    return  results;
+    }exports.enumerate = enumerate;
+
+
+    function traits(x)
+    {// only inherited properties, contrary to keys
+        var results = [];
+        for (var property in x)
+            if ( !exports.hasOwnProperty(x, property) )
+                results[results.length] = property;
+    return results;
+    }exports.traits = traits;
+
+
+// *******************************************
+// TODO? move the following to compare
+// *******************************************
 
 // NOT TO BE CONFUSED WITH propertyIsEnumerable, since it also check's for 'own'. hasKey?
     exports.hasEnumerable = exports.isEnumerable = /* TODO exports.getOwnPropertyDescriptor ?
@@ -178,12 +204,13 @@ var exports = exports || {};
         function(x, item)
         {
             for (var property in x)
-                if (property === item) 
+                if (property === item)
                 { 
         return true; 
                 }
         return false;
         };
+
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/propertyIsEnumerable
     exports.propertyIsEnumerable = Object.prototype.propertyIsEnumerable ? 
@@ -193,19 +220,10 @@ var exports = exports || {};
 
     exports.is = Object.is || function(x, y) 
     {
-    if ( x === 0 && y === 0 ) { return 1/x === 1/y; } // -Infinity != Infinity, ergo -0 != 0
-    if ( x !== x && y !== y ) { return true; }        // NaN: not reflexive
+    if (x === 0  &&  y === 0) { return 1/x === 1/y; } // -Infinity != Infinity, ergo -0 != 0
+    if (x !== x  &&  y !== y) { return true; }        // NaN: not reflexive
                                 return x === y;
     };
-
-
-    function enumerate(x)
-    {// we don't call them 'properties' as getOwnPropertyNames include some not enumerable
-        var results = [];
-        for (var property in x)
-            results[results.length] = property;
-    return  results;
-    }exports.enumerate = enumerate;
 
 
     exports.keys = Object.keys || function(x)
@@ -218,16 +236,6 @@ var exports = exports || {};
     };
 
     exports.getOwnPropertyNames = Object.getOwnPropertyNames || exports.keys; // + self? TODO is there another way to do introspection ?
-
-
-    function traits(x)
-    {// only inherited properties, contrary to keys
-        var results = [];
-        for (var property in x)
-            if ( !exports.hasOwnProperty(x, property) )
-                results[results.length] = property;
-    return results;
-    }exports.traits = traits;
 
 
 // ***** IDEPOTENT suscriptor functions *****
@@ -264,6 +272,7 @@ var exports = exports || {};
     {
         try
         {
+// TODO?    x[item] = exports.undefined instead?
             x[item] = undefined; // in case the below fails for being immutable
 delete      x[item];
         }catch(err){};
@@ -313,11 +322,11 @@ delete      x[item];
 
 
     exports.parse = {
-        string: String,
-        Date_ : exports.parseDate,
-        Int   : exports.parseInt,
-        Float : exports.parseFloat,
-        JSON  : exports.parseJSON };
+        String_: String,
+        Date_  : exports.parseDate,
+        Int    : exports.parseInt,
+        Float  : exports.parseFloat,
+        JSON   : exports.parseJSON };
 
     exports.index = {
         array : {first:exports.indexOf       , last:exports.lastIndexOf},

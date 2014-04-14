@@ -10,6 +10,7 @@ var exports = exports || {};
 
     var Module = { // just in case we decide to move the files from place
         // basic
+            Plugin_      : PATH + 'plugin',
             Lorem        : PATH + 'lorem',
             Color        : PATH + 'color',
             UID          : PATH + 'uid',
@@ -29,21 +30,21 @@ var exports = exports || {};
             Math_        : PATH + 'math',
         // structures
             Suscriptible : PATH + 'suscriptible',
-			Sort         : PATH + 'sort',
-			Sequence     : PATH + 'sequence', 
-			Dictionary   : PATH + 'dictionary',
-			Collection   : PATH + 'collection', 
-			Iterable     : PATH + 'iterable',
-			Recursive    : PATH + 'recursive',
-			OOP          : PATH + 'oop',
-			Str          : PATH + 'string',
-			Ext          : PATH + 'ext',
-			ASCII        : PATH + 'ascii',
-			Name         : PATH + 'name',
-			RegEx        : PATH + 'regexp',
-			DateTime     : PATH + 'date',
-			Time         : PATH + 'time',
-			Locale       : PATH + 'locale',
+            Sort         : PATH + 'sort',
+            Sequence     : PATH + 'sequence', 
+            Dictionary   : PATH + 'dictionary',
+            Collection   : PATH + 'collection', 
+            Iterable     : PATH + 'iterable',
+            Recursive    : PATH + 'recursive',
+            OOP          : PATH + 'oop',
+            Str          : PATH + 'string',
+            Ext          : PATH + 'ext',
+            ASCII        : PATH + 'ascii',
+            Name         : PATH + 'name',
+            RegEx        : PATH + 'regexp',
+            DateTime     : PATH + 'date',
+            Time         : PATH + 'time',
+            Locale       : PATH + 'locale',
 		// fn delegation
 			Fn           : PATH + 'function',
 			Cross        : PATH + 'cross',
@@ -59,29 +60,32 @@ var exports = exports || {};
 		// memory management
 			Mem          : PATH + 'mem',
 			BLOb         : PATH + 'blob',
-		// File System
-			FS           : PATH + 'fs',
-			Path         : PATH + 'path',
-		// Data structures
-			URI          : PATH + 'uri',
-			SQLess       : PATH + 'sqless',
-		// Advanced data management
-			Stream       : PATH + 'stream',
-			NW           : PATH + 'nw',
-		// other
-			Unit         : PATH + 'unit',
-			Test         : PATH + 'test',
-			ISO8601      : Path.Third + 'iso8601',
-			underscore   : Path.Third + 'underscore.1.3.3',
-			jsunity      : Path.Third + 'jsunity.0.6',
-		// UI
-			Display      : PATH + 'display',
-			Orientation  : PATH + 'orientation',
-			Container    : PATH + 'container',
-			UI           : PATH + 'ui'};
-			Module.Debug = Module.Log; // XXX
-			Module.Session = Module.AppProperties;
-	exports.Module = Module;
+        // File System
+            FS           : PATH + 'fs',
+            Path         : PATH + 'path',
+        // Data structures
+            URI          : PATH + 'uri',
+            SQLess       : PATH + 'sqless',
+        // Advanced data management
+            Stream       : PATH + 'stream',
+            NW           : PATH + 'nw',
+        // other
+            Unit         : PATH + 'unit',
+            Test         : PATH + 'test',
+            ISO8601      : Path.Third + 'iso8601',
+            underscore   : Path.Third + 'underscore.1.3.3',
+            jsunity      : Path.Third + 'jsunity.0.6',
+        // UI
+            Display      : PATH + 'display',
+            Orientation  : PATH + 'orientation',
+            Container    : PATH + 'container',
+            UI           : PATH + 'ui' };
+
+// aliases
+    Module.Debug   = Module.Log; // XXX
+    Module.Session = Module.AppProperties;
+    exports.Module = Module;
+
 
 var logger = require(exports.Module.Log);
 
