@@ -83,7 +83,7 @@ exports.passOrNothing = cast.passOrNothing;
     function isNaN(x) { return x !== x; } // wait... what o.O?
      exports.isNaN = isNaN;
 
-    function typeName_get(x) { return builtin.String(   builtin.String_slice(  builtin.toString(x),  8,  -1 )   ); } // extract name from '[object <name>]' 
+    function typeName_get(x) { return builtin.String(  builtin.String_slice( builtin.toString(x), 8, -1 )  ); } // extract name from '[object <name>]' 
      exports.typeName_get = exports.typeName = exports.getTypeName = typeName_get;
 
     function typeName_native_get(x) { return builtin.toLowerCase( exports.typeName_get(x) ); }
@@ -135,16 +135,16 @@ exports.passOrNothing = cast.passOrNothing;
 
 
 // ***** lowest level comparisons *****
-    function isTrue    (x, precision) { return exports.isValue(x, true , precision); }
+    function isTrue (x, precision) { return exports.isValue(x, true , precision); }
      exports.isTrue = isTrue;
 
-    function isFalse   (x, precision) { return exports.isValue(x, false, precision); }
+    function isFalse(x, precision) { return exports.isValue(x, false, precision); }
      exports.isFalse = isFalse;
 
-    function isZero    (x, precision) { return exports.isValue(x,  0, precision); }
+    function isZero(x, precision) { return exports.isValue(x,  0, precision); }
      exports.isZero = exports.is0 = isZero;
 
-    function isOne     (x, precision) { return exports.isValue(x,  1, precision); }
+    function isOne (x, precision) { return exports.isValue(x,  1, precision); }
      exports.isOne = exports.is1 = isOne;
 
     function isMinusOne(x, precision) { return exports.isValue(x, -1, precision); }
@@ -714,7 +714,7 @@ exports.defaultContext = exports.defaultParam;
     { //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/valueOf?redirectlocale=en-US&redirectslug=JavaScript%2FReference%2FGlobal_Objects%2FObject%2FvalueOf
         if( exports.isObjectOther(x) )
         {// ProtoObjects complain when trying to look into something they might not have
-    return x
+    return x;
         }
     // if an object has no primitive value, valueOf returns the object itself
     return exports.defaultToValue( exports.resolveProperty(x, property, args, context),  x );
