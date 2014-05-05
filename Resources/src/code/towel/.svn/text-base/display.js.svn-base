@@ -1,5 +1,0 @@
-var exports = exports || {}
-	exports.width   = Ti.Platform.displayCaps.platformWidth
-	exports.height  = Ti.Platform.displayCaps.platformHeight
-	exports.isSmall = ( exports.width < 400 )
-Ti.API.info( exports.width + 'x' + exports.height )

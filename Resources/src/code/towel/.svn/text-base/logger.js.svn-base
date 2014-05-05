@@ -1,3 +1,0 @@
-exports.format = function(str) { return ( new Date() + ': ' + str ) }
-exports.info   = function(str) { Titanium.API.info(  exports.format(str) ) }
-exports.debug  = function(str) { Titanium.API.debug( exports.format(str) ) }
