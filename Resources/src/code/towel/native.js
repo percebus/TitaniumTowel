@@ -11,8 +11,8 @@ var exports = exports || {};
     function isIdentical(x, y) { return x === y; }
      exports.isIdentical = exports.areIdentical = isIdentical;
 
-    function typeOf(x) { return typeof(x); } 
-     exports.typeOf = typeOf; // for some reason I cannot assign it directly
+    function typeOf(x) { return typeof(x); }// for some reason I cannot assign it directly typeOf = typeof 
+     exports.typeOf = typeOf;
 
     function instanceOf(x, y) { return x instanceof y; }
      exports.instanceOf = instanceOf;
@@ -25,8 +25,8 @@ var exports = exports || {};
     exports.eval = eval;
     exports.Math   = Math;
     exports.abs    = Math.abs;
-    exports.min	   = Math.min;
-    exports.max	   = Math.max;
+    exports.min    = Math.min;
+    exports.max    = Math.max;
     exports.round  = Math.round;
     exports.ceil   = Math.ceil;
     exports.random = Math.random;
@@ -83,7 +83,6 @@ var exports = exports || {};
     exports.isSealed                 = Object.isSealed;
     exports.isFrozen                 = Object.isFrozen;
 
-// TODO Are these Titanium specific?
     exports.escape              = escape;
     exports.unescape            = unescape;
     exports.encodeURI           = encodeURI;
@@ -105,22 +104,22 @@ var exports = exports || {};
     exports.every       = Array.prototype.every       ? function(x, fn, context) { return Array.prototype.every.call  (x, fn, context); } : null;
     exports.map         = Array.prototype.map         ? function(x, fn, context) { return Array.prototype.map.call    (x, fn, context); } : null;
     exports.filter      = Array.prototype.filter      ? function(x, fn, context) { return Array.prototype.filter.call (x, fn, context); } : null;
-    exports.reduce      = Array.prototype.reduce      ? function(x, fn) { return Array.prototype.reduce     .call(x, fn); } : null;
+    exports.reduce      = Array.prototype.reduce      ? function(x, fn) { return Array.prototype.reduce.call     (x, fn); } : null;
     exports.reduceRight = Array.prototype.reduceRight ? function(x, fn) { return Array.prototype.reduceRight.call(x, fn); } : null;
 
-    exports.push        = Array.prototype.push        ? function(x, item ) { return Array.prototype.push.call       (x, item);  } : null; // TODO item_s
-    exports.pop         = Array.prototype.pop         ? function(x       ) { return Array.prototype.pop.call        (x      );  } : null;
-    exports.reverse     = Array.prototype.reverse     ? function(x       ) { return Array.prototype.reverse.call    (x      );  } : null;
-    exports.sort        = Array.prototype.sort        ? function(x, fn   ) { return Array.prototype.sort.call       (x, fn  );  } : null;
-    exports.join        = Array.prototype.join        ? function(x, item ) { return Array.prototype.join.call       (x, item);  } : null;
-    exports.shift       = Array.prototype.shift       ? function(x       ) { return Array.prototype.shift.call      (x      );  } : null;
-    exports.unshift     = Array.prototype.unshift     ? function(x, items) { return Array.prototype.unshift.apply   (x, items); } : null;
-    exports.concat      = Array.prototype.concat      ? function(x, items) { return Array.prototype.concat.apply    (x, items); } : null;
+    exports.push        = Array.prototype.push        ? function(x, item ) { return Array.prototype.push.call   (x, item);  } : null; // TODO item_s
+    exports.pop         = Array.prototype.pop         ? function(x       ) { return Array.prototype.pop.call    (x      );  } : null;
+    exports.reverse     = Array.prototype.reverse     ? function(x       ) { return Array.prototype.reverse.call(x      );  } : null;
+    exports.sort        = Array.prototype.sort        ? function(x, fn   ) { return Array.prototype.sort.call   (x, fn  );  } : null;
+    exports.join        = Array.prototype.join        ? function(x, item ) { return Array.prototype.join.call   (x, item);  } : null;
+    exports.shift       = Array.prototype.shift       ? function(x       ) { return Array.prototype.shift.call  (x      );  } : null;
+    exports.unshift     = Array.prototype.unshift     ? function(x, items) { return Array.prototype.unshift.apply(x, items); } : null;
+    exports.concat      = Array.prototype.concat      ? function(x, items) { return Array.prototype.concat.apply (x, items); } : null;
 
-// TODO remove the below?
     exports.indexOf            = Array.prototype.indexOf      ? function(x, item) { return Array.prototype.indexOf.call     (x, item); } : null;
     exports.lastIndexOf        = Array.prototype.lastIndexOf  ? function(x, item) { return Array.prototype.lastIndexOf.call (x, item); } : null;
     exports.slice              = Array.prototype.slice        ? function(x, i, I) { return Array.prototype.slice.call       (x, i, I); } : null;
+// TODO remove the below?
     exports.String_indexOf     = String.prototype.indexOf     ? function(x, item) { return String.prototype.indexOf.call    (x, item); } : null;
     exports.String_lastIndexOf = String.prototype.lastIndexOf ? function(x, item) { return String.prototype.lastIndexOf.call(x, item); } : null;
     exports.String_slice       = String.prototype.slice       ? function(x, i, I) { return String.prototype.slice.call      (x, i, I); } : null;
@@ -285,7 +284,7 @@ delete      x[item];
         for (var property in x)
             if( exports.hasOwnProperty(x, property) )
             {// we just want to know if it has at least 1 key so we can differenciate it from the other types of objects!
-	return true;
+    return true;
             }
     return false;
     }exports.hasKeys = exports.hasAnyKey = hasKeys;
